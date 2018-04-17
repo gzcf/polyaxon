@@ -144,25 +144,3 @@ class ExperimentCreateSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return obj.user.username
-
-    def validate_content(self, content):
-        """We only validate the content if passed.
-
-        Also we use the GroupSpecification to check if this content was
-        intended as Group experiments.
-        """
-        # content is optional
-        if not content:
-            return content
-
-        spec = validate_spec_content(content)
-
-        if spec.matrix_space == 1:
-            # Resume normal creation
-            return content
-
-        # Raise an error to tell the use to use experiment creation instead
-        raise ValidationError('Current experiment creation could not be performed.\n'
-                              'The reason is that the specification sent correspond '
-                              'to a group experiment.\n'
-                              'Please use `create group experiment endpoint`.')

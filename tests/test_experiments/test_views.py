@@ -126,6 +126,26 @@ class TestProjectExperimentListViewV1(BaseViewTest):
         resp = self.auth_client.post(self.other_url, data)
         assert resp.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
+        spec_content = """---
+        version: 1
+
+        project:
+          name: polyaxon-test
+
+        environment:
+          resources:
+            memory:
+              requests: 100
+              limits: 200
+        run:
+          image: tensorflow/tensorflow:1.4.1-py3
+          cmd:  python3 -c "print('hello')"
+        """
+        spec_parsed_content = Specification.read(spec_content)
+        data = {'config': spec_parsed_content.parsed_data}
+        data['content'] = """"{'version': 1, 'project': {'name': 'polyaxon-test'}, 'environment': {'resources': {'memory': {'requests': 100, 'limits': 200}}}, 'run': {'image': 'tensorflow/tensorflow:1.4.1-py3', 'cmd': 'python3 -c "print(\'hello\')"'}}"""
+        resp = self.auth_client.post(self.url, data)
+        assert resp.status_code == status.HTTP_201_CREATED
 
 class TestExperimentGroupExperimentListViewV1(BaseViewTest):
     serializer_class = ExperimentSerializer

@@ -121,3 +121,5 @@ client/polyaxon/**/*.js.map
 /examples/polyaxon-logs/
 # don't ignore static dist
 !/static/dist
+
+.pytest_cache

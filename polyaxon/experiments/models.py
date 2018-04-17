@@ -47,8 +47,7 @@ class Experiment(DiffModel, DescribableModel):
     content = models.TextField(
         blank=True,
         null=True,
-        help_text='The yaml content of the polyaxonfile/specification.',
-        validators=[validate_spec_content])
+        help_text='[Deprecated] The yaml content of the polyaxonfile/specification.')
     config = JSONField(
         help_text='The compiled polyaxon with specific values for this experiment.',
         validators=[validate_spec_content])
