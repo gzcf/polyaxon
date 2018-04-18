@@ -3,9 +3,11 @@ from __future__ import absolute_import, division, print_function
 
 from unittest.mock import patch
 
+from faker import Faker
 from polyaxon_schemas.polyaxonfile.specification import Specification
 from rest_framework import status
 
+from experiments.paths import get_experiment_logs_path
 from polyaxon.urls import API_V1
 from experiments.models import (
     Experiment,
@@ -856,3 +858,62 @@ class TestStopExperimentViewV1(BaseViewTest):
         assert mock_fct.call_count == 1
         assert resp.status_code == status.HTTP_200_OK
         assert self.queryset.count() == 1
+
+
+class TestExperimentLogListViewV1(BaseViewTest):
+    num_log_lines = 10
+    HAS_AUTH = True
+
+    def setUp(self):
+        super().setUp()
+        with patch('experiments.tasks.start_experiment.delay') as _:
+            project = ProjectFactory(user=self.auth_client.user)
+            experiment = ExperimentFactory(project=project)
+        self.url = '/{}/{}/{}/experiments/{}/logs'.format(
+            API_V1,
+            project.user.username,
+            project.name,
+            experiment.sequence)
+
+        log_path = get_experiment_logs_path(experiment.unique_name)
+        fake = Faker()
+        self.logs = []
+        for _ in range(self.num_log_lines):
+            self.logs.append(fake.sentence())
+        with open(log_path, 'w') as file:
+            for line in self.logs:
+                file.write(line)
+                file.write('\n')
+
+    def test_get(self):
+        resp = self.auth_client.get(self.url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+        assert resp.data['count'] == len(self.logs)
+
+        data = resp.data['results']
+        assert len(data) == len(self.logs)
+        assert data == self.logs
+
+    def test_pagination(self):
+        limit = self.num_log_lines - 1
+        resp = self.auth_client.get("{}?limit={}".format(self.url, limit))
+        assert resp.status_code == status.HTTP_200_OK
+
+        next = resp.data.get('next')
+        assert next is not None
+        assert resp.data['count'] == len(self.logs)
+
+        data = resp.data['results']
+        assert len(data) == limit
+        assert data == self.logs[:limit]
+
+        resp = self.auth_client.get(next)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+
+        data = resp.data['results']
+        assert len(data) == 1
+        assert data == self.logs[limit:]
