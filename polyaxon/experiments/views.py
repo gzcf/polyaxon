@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import logging
+
 from rest_framework import status
 from rest_framework.generics import (
     RetrieveAPIView,
@@ -37,6 +39,7 @@ from libs.views import ListCreateAPIView
 from projects.models import ExperimentGroup
 from projects.permissions import get_permissible_project
 
+logger = logging.getLogger("polyaxon.experiments.views")
 
 class ExperimentListView(ListAPIView):
     """List all experiments"""
@@ -259,8 +262,13 @@ class ExperimentLogListView(ExperimentViewMixin, APIView):
     def get(self, request, username, name, experiment_sequence):
         experiment = self.get_experiment()
         log_path = get_experiment_logs_path(experiment.unique_name)
-        with open(log_path, 'r') as file:
-            logs = [line.rstrip('\n') for line in file]
+        logs = []
+
+        try:
+            with open(log_path, 'r') as file:
+                logs = [line.rstrip('\n') for line in file]
+        except FileNotFoundError:
+            logger.warning('Log file not found: log_path=%s', log_path)
 
         page = self.paginate_queryset(logs)
         if page is not None:
