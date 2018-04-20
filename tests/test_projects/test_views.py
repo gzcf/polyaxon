@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 
 from unittest.mock import patch
 
+from flaky import flaky
 from rest_framework import status
 
 from factories.factory_experiments import ExperimentStatusFactory, ExperimentFactory
@@ -90,6 +91,7 @@ class TestProjectListViewV1(BaseViewTest):
         assert len(data) == 1
         assert data[0] == self.serializer_class(self.other_object).data
 
+    @flaky(max_runs=3)
     def test_pagination(self):
         limit = self.num_objects - 1
         resp = self.auth_client.get("{}?limit={}".format(self.url, limit))
