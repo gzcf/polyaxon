@@ -13,7 +13,7 @@ export interface RequestLogsAction extends Action {
 
 export interface ReceiveLogsAction extends Action {
   type: actionTypes.RECEIVE_LOGS;
-  logs: string[];
+  logs: string;
 }
 
 export function requestLogsActionCreator(): RequestLogsAction {
@@ -22,7 +22,7 @@ export function requestLogsActionCreator(): RequestLogsAction {
   };
 }
 
-export function receiveLogsActionCreator(logs: string[]): ReceiveLogsAction {
+export function receiveLogsActionCreator(logs: string): ReceiveLogsAction {
   return {
     type: actionTypes.RECEIVE_LOGS,
     logs
@@ -48,6 +48,7 @@ export function fetchLogs(projectUniqueName: string, experimentSequence: number)
     // }, 500);
     return fetch(logsUrl, {
       headers: {
+        'Content-Type': 'text/plain;charset=UTF-8',
         'Authorization': 'token ' + getState().auth.token
       }
     })

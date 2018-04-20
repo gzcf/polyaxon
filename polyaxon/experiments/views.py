@@ -2,11 +2,11 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-
 import mimetypes
 import os
-
 from wsgiref.util import FileWrapper
+
+from django.http import StreamingHttpResponse
 from rest_framework import status
 from rest_framework.generics import (
     RetrieveAPIView,
@@ -17,9 +17,6 @@ from rest_framework.generics import (
     ListAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from django.http import StreamingHttpResponse
 
 from experiments.models import (
     Experiment,
@@ -45,6 +42,7 @@ from projects.models import ExperimentGroup
 from projects.permissions import get_permissible_project
 
 logger = logging.getLogger("polyaxon.experiments.views")
+
 
 class ExperimentListView(ListAPIView):
     """List all experiments"""
