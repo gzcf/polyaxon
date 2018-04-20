@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function
-
+from polyaxon_schemas.polyaxonfile.specification import Specification
+from faker import Faker
 from unittest.mock import patch
 
-from faker import Faker
-from polyaxon_schemas.polyaxonfile.specification import Specification
 from rest_framework import status
 
 from experiments.paths import get_experiment_logs_path
