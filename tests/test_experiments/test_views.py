@@ -889,31 +889,6 @@ class TestExperimentLogListViewV1(BaseViewTest):
         resp = self.auth_client.get(self.url)
         assert resp.status_code == status.HTTP_200_OK
 
-        assert resp.data['next'] is None
-        assert resp.data['count'] == len(self.logs)
-
-        data = resp.data['results']
+        data = resp.data
         assert len(data) == len(self.logs)
         assert data == self.logs
-
-    def test_pagination(self):
-        limit = self.num_log_lines - 1
-        resp = self.auth_client.get("{}?limit={}".format(self.url, limit))
-        assert resp.status_code == status.HTTP_200_OK
-
-        next = resp.data.get('next')
-        assert next is not None
-        assert resp.data['count'] == len(self.logs)
-
-        data = resp.data['results']
-        assert len(data) == limit
-        assert data == self.logs[:limit]
-
-        resp = self.auth_client.get(next)
-        assert resp.status_code == status.HTTP_200_OK
-
-        assert resp.data['next'] is None
-
-        data = resp.data['results']
-        assert len(data) == 1
-        assert data == self.logs[limit:]
