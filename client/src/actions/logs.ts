@@ -52,8 +52,8 @@ export function fetchLogs(projectUniqueName: string, experimentSequence: number)
       }
     })
       .then(response => handleAuthError(response, dispatch))
-      .then(response => response.json())
-      .then(json => dispatch(receiveLogsActionCreator(json)))
+      .then(response => response.text())
+      .then(text => dispatch(receiveLogsActionCreator(text)))
       .catch(error => undefined);
   };
 }
