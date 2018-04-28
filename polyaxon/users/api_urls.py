@@ -19,6 +19,8 @@ urlpatterns = [
         views.ActivateView.as_view()),
     url(r'^users/delete/{}/?$'.format(USERNAME_PATTERN),
         views.DeleteView.as_view()),
+    url(r'^users/refreshSession/?$',
+        views.RefreshSessionView.as_view()),
     url(r'^superusers/grant/{}/?$'.format(USERNAME_PATTERN),
         views.GrantSuperuserView.as_view()),
     url(r'^superusers/revoke/{}/?$'.format(USERNAME_PATTERN),
