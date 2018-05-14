@@ -6,6 +6,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { ExperimentModel } from '../models/experiment';
 import Jobs from '../containers/jobs';
 import Logs from '../containers/logs';
+import Graphs from '../containers/graphs';
 import {
   getGroupUrl,
   getProjectUrl,
@@ -15,6 +16,7 @@ import {
   getCssClassForStatus,
 } from '../constants/utils';
 import TaskRunMetaInfo from './taskRunMetaInfo';
+import { Tab, Tabs } from 'react-bootstrap';
 
 export interface Props {
   experiment: ExperimentModel;
@@ -135,10 +137,21 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
             </div>
             }
           </div>
-          <h4 className="polyaxon-header">Jobs</h4>
-          <Jobs fetchData={() => null} user={experiment.user} experiment={experiment}/>
-          <h4 className="polyaxon-header">Logs</h4>
-          <Logs fetchData={() => null} logs={''} user={experiment.user} experiment={experiment}/>
+
+          <Tabs defaultActiveKey={1} id="experiment-tabs">
+            <Tab eventKey={1} title="Main">
+              <h4 className="polyaxon-header">Jobs</h4>
+              <Jobs fetchData={() => null} user={experiment.user} experiment={experiment}/>
+              <h4 className="polyaxon-header">Logs</h4>
+              <Logs fetchData={() => null} logs={''} user={experiment.user} experiment={experiment}/>
+            </Tab>
+            <Tab eventKey={2} title="Graph">
+              <Graphs fetchData={() => null}/>
+            </Tab>
+            <Tab eventKey={3} title="Tab 3">
+              Tab 3 content
+            </Tab>
+          </Tabs>
         </div>
       </div>
     );

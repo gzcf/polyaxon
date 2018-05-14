@@ -12,6 +12,7 @@ import { modalReducer } from '../reducers/modal';
 import { userReducer } from '../reducers/user';
 import { PaginationReducer } from '../reducers/pagination';
 import { logsReducer } from './logs';
+import { metricsReducer } from './metrics';
 
 const combinedReducer = combineReducers<AppState>({
   projects: projectsReducer,
@@ -23,7 +24,8 @@ const combinedReducer = combineReducers<AppState>({
   users: userReducer,
   form: formReducer,
   pagination: PaginationReducer,
-  logs: logsReducer
+  logs: logsReducer,
+  metrics: metricsReducer,
 });
 
 function SliceReducer(state: AppState, action: Action) {
