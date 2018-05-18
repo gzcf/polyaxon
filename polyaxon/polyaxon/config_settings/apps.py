@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+from polyaxon.utils import config
+
 PROJECT_APPS = (
     'polyaxon',
     'libs.apps.LibsConfig',
@@ -17,6 +19,9 @@ PROJECT_APPS = (
     'spawners.apps.SpawnersConfig',
     'schedulers.apps.SchedulersConfig',
 )
+
+if config.get_boolean('POLYAXON_AUTH_LDAP', is_optional=True):
+    PROJECT_APPS += ('auth_ldap.apps.AuthLdapConfig',)
 
 THIRD_PARTY_APPS = (
     'rest_framework',
