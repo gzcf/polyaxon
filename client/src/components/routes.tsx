@@ -11,6 +11,7 @@ import Logout from '../containers/logout';
 import Token from '../containers/token';
 
 import { isUserAuthenticated, getHomeUrl, getLoginUrl, getLogoutUrl } from '../constants/utils';
+import Queue from '../containers/queue';
 
 
 function Routes() {
@@ -20,6 +21,7 @@ function Routes() {
   let experimentDetailRoute = '/app/:user/:projectName/experiments/:experimentSequence/';
   let groupDetailRoute = '/app/:user/:projectName/groups/:groupSequence/';
   let jobDetailRoute = '/app/:user/:projectName/experiments/:experimentSequence/jobs/:jobSequence/';
+  let queueRoute = '/app/queue';
 
   return (
     <Switch>
@@ -30,6 +32,17 @@ function Routes() {
         render={() => (
           isUserAuthenticated() ? (
             <Route path={tokenRoute} component={Token}/>
+          ) : (
+            <Redirect to={getLoginUrl()}/>
+          )
+        )}
+      />
+
+      <Route
+        path={queueRoute}
+        render={() => (
+          isUserAuthenticated() ? (
+            <Route path={queueRoute} component={Queue}/>
           ) : (
             <Redirect to={getLoginUrl()}/>
           )

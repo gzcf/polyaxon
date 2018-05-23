@@ -28,6 +28,9 @@ function Header() {
               <MenuItem divider={true}/>
               <MenuItem eventKey={3.3} href={getLogoutUrl()}>Logout</MenuItem>
             </NavDropdown>
+            <NavDropdown eventKey={4} title="More" id="more-nav-dropdown">
+              <MenuItem eventKey={4.1} href="/app/queue">Queue</MenuItem>
+            </NavDropdown>
           </Nav>
         </Navbar.Collapse>
         }
