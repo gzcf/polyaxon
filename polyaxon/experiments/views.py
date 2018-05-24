@@ -7,7 +7,7 @@ import os
 from wsgiref.util import FileWrapper
 
 from django.http import StreamingHttpResponse
-from rest_framework import status
+from rest_framework import status, filters
 from rest_framework.generics import (
     RetrieveAPIView,
     CreateAPIView,
@@ -36,10 +36,12 @@ from experiments.serializers import (
     ExperimentDetailSerializer,
 )
 from experiments.tasks import stop_experiment
+from libs import utils
 from libs.utils import to_bool
 from libs.views import ListCreateAPIView
 from projects.models import ExperimentGroup
 from projects.permissions import get_permissible_project
+from spawners.utils.constants import ExperimentLifeCycle
 
 logger = logging.getLogger("polyaxon.experiments.views")
 
@@ -49,6 +51,14 @@ class ExperimentListView(ListAPIView):
     queryset = Experiment.objects.all()
     serializer_class = ExperimentSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.OrderingFilter,)
+
+    def get_queryset(self):
+        queryset = Experiment.objects.all()
+        is_running = utils.to_bool(self.request.query_params.get('is_running', False))
+        if is_running:
+            queryset = queryset.filter(experiment_status__status__in=ExperimentLifeCycle.RUNNING_STATUS)
+        return queryset
 
 
 class ProjectExperimentListView(ListCreateAPIView):

@@ -1,11 +1,9 @@
-from polyaxon_schemas.polyaxonfile.specification import Specification
-from faker import Faker
 from unittest.mock import patch
 
+from faker import Faker
+from polyaxon_schemas.polyaxonfile.specification import Specification
 from rest_framework import status
 
-from experiments.paths import get_experiment_logs_path
-from polyaxon.urls import API_V1
 from experiments.models import (
     Experiment,
     ExperimentStatus,
@@ -13,6 +11,7 @@ from experiments.models import (
     ExperimentJobStatus,
     ExperimentMetric,
 )
+from experiments.paths import get_experiment_logs_path
 from experiments.serializers import (
     ExperimentSerializer,
     ExperimentStatusSerializer,
@@ -22,9 +21,6 @@ from experiments.serializers import (
     ExperimentMetricSerializer,
     ExperimentDetailSerializer,
 )
-from factories.fixtures import exec_experiment_spec_parsed_content
-from spawners.utils.constants import JobLifeCycle, ExperimentLifeCycle
-
 from factories.factory_experiments import (
     ExperimentFactory,
     ExperimentStatusFactory,
@@ -32,6 +28,9 @@ from factories.factory_experiments import (
     ExperimentJobStatusFactory,
     ExperimentMetricFactory)
 from factories.factory_projects import ProjectFactory, ExperimentGroupFactory
+from factories.fixtures import exec_experiment_spec_parsed_content
+from polyaxon.urls import API_V1
+from spawners.utils.constants import JobLifeCycle, ExperimentLifeCycle
 from tests.utils import BaseViewTest
 
 
@@ -146,6 +145,7 @@ class TestProjectExperimentListViewV1(BaseViewTest):
         resp = self.auth_client.post(self.url, data)
         assert resp.status_code == status.HTTP_201_CREATED
 
+
 class TestExperimentGroupExperimentListViewV1(BaseViewTest):
     serializer_class = ExperimentSerializer
     model_class = Experiment
@@ -247,16 +247,26 @@ class TestExperimentListViewV1(BaseViewTest):
     serializer_class = ExperimentSerializer
     model_class = Experiment
     factory_class = ExperimentFactory
-    num_objects = 3
+    num_objects = 4
     HAS_AUTH = True
 
     def setUp(self):
         super().setUp()
         self.project = ProjectFactory(user=self.auth_client.user)
-        self.url = '/{}/{}/{}/experiments/'.format(API_V1,
-                                                   self.project.user,
-                                                   self.project.name)
-        self.objects = [self.factory_class(project=self.project) for _ in range(self.num_objects)]
+        self.url = '/{}/experiments/'.format(API_V1)
+        self.statuses = [ExperimentLifeCycle.CREATED, ExperimentLifeCycle.BUILDING,
+                         ExperimentLifeCycle.RUNNING, ExperimentLifeCycle.SUCCEEDED]
+
+        objects = []
+        with patch.object(Experiment, 'set_status') as _:
+            with patch('experiments.tasks.start_experiment.delay') as _:
+                with patch('schedulers.experiment_scheduler.stop_experiment') as _:
+                    for i in range(self.num_objects):
+                        experiment = self.factory_class(project=self.project)
+                        ExperimentStatusFactory(id=i + 1, status=self.statuses[i],
+                                                experiment=experiment)
+                        objects.append(experiment)
+        self.objects = objects
         self.queryset = self.model_class.objects.all()
 
     def test_get(self):
@@ -269,6 +279,67 @@ class TestExperimentListViewV1(BaseViewTest):
         data = resp.data['results']
         assert len(data) == self.queryset.count()
         assert data == self.serializer_class(self.queryset, many=True).data
+
+    def test_get_running_experiments(self):
+        url = self.url + '?is_running=1'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+        running_count = sum(1 for s in self.statuses if ExperimentLifeCycle.is_running(s))
+        assert resp.data['count'] == running_count
+
+        data = resp.data['results']
+        assert len(data) == running_count
+        for xp in data:
+            assert xp['last_status'] in ExperimentLifeCycle.RUNNING_STATUS
+
+    def test_get_order_by_created_at_desc(self):
+        url = self.url + '?ordering=-created_at'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+        data = resp.data['results']
+        prev_created_at = None
+        for experiment in data:
+            assert prev_created_at is None or prev_created_at >= experiment['created_at']
+            prev_created_at = experiment['created_at']
+
+        url = self.url + '?ordering=-created_at&is_running=1'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        data = resp.data['results']
+        prev_created_at = None
+        for experiment in data:
+            assert experiment['last_status'] in ExperimentLifeCycle.RUNNING_STATUS
+            assert prev_created_at is None or prev_created_at >= experiment['created_at']
+            prev_created_at = experiment['created_at']
+
+    def test_ordering_with_pagination(self):
+        limit = self.num_objects - 1
+        url = self.url + '?ordering=-created_at&limit={}'.format(limit)
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        next = resp.data.get('next')
+        assert next is not None
+        assert resp.data['count'] == self.queryset.count()
+
+        data = resp.data['results']
+        assert len(data) == limit
+        prev_created_at = None
+        for experiment in data:
+            assert prev_created_at is None or prev_created_at >= experiment['created_at']
+            prev_created_at = experiment['created_at']
+
+        resp = self.auth_client.get(next)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+
+        data = resp.data['results']
+        assert len(data) == 1
+        assert prev_created_at >= data[0]['created_at']
 
     def test_pagination(self):
         limit = self.num_objects - 1
@@ -342,9 +413,9 @@ class TestExperimentDetailViewV1(BaseViewTest):
         project = ProjectFactory(user=self.auth_client.user)
         object = self.factory_class(project=project, config=spec_parsed_content.parsed_data)
         url = '/{}/{}/{}/experiments/{}/'.format(API_V1,
-                                                project.user.username,
-                                                project.name,
-                                                object.sequence)
+                                                 project.user.username,
+                                                 project.name,
+                                                 object.sequence)
 
         resp = self.auth_client.get(url)
         assert resp.status_code == status.HTTP_200_OK
@@ -478,7 +549,7 @@ class TestExperimentMetricListViewV1(BaseViewTest):
                                                               project.user.username,
                                                               project.name,
                                                               self.experiment.sequence)
-        self.objects = [self.factory_class(experiment=self.experiment, values = {'accuracy': i/10})
+        self.objects = [self.factory_class(experiment=self.experiment, values={'accuracy': i / 10})
                         for i in range(self.num_objects)]
         self.queryset = self.model_class.objects.all()
 

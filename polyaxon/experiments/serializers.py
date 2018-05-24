@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function
 
 from rest_framework import fields, serializers
-from rest_framework.exceptions import ValidationError
 
 from experiments.models import (
     Experiment,
@@ -12,7 +11,6 @@ from experiments.models import (
     ExperimentMetric
 )
 from jobs.serializers import JobResourcesSerializer
-from libs.spec_validation import validate_spec_content
 
 
 class ExperimentJobStatusSerializer(serializers.ModelSerializer):
@@ -89,6 +87,7 @@ class ExperimentSerializer(serializers.ModelSerializer):
     last_metric = fields.SerializerMethodField()
     started_at = fields.DateTimeField(read_only=True)
     finished_at = fields.DateTimeField(read_only=True)
+    resources = fields.SerializerMethodField()
 
     class Meta:
         model = Experiment
@@ -96,7 +95,7 @@ class ExperimentSerializer(serializers.ModelSerializer):
             'uuid', 'unique_name', 'user', 'sequence', 'description', 'created_at', 'updated_at',
             'last_status', 'last_metric', 'started_at', 'finished_at', 'is_running', 'is_done',
             'is_clone', 'project', 'project_name', 'experiment_group',
-            'experiment_group_name', 'num_jobs',)
+            'experiment_group_name', 'num_jobs', 'resources')
 
     def get_user(self, obj):
         return obj.user.username
@@ -118,6 +117,9 @@ class ExperimentSerializer(serializers.ModelSerializer):
 
     def get_last_metric(self, obj):
         return {k: round(v, 7) for k, v in obj.last_metric.items()} if obj.last_metric else None
+
+    def get_resources(self, obj):
+        return obj.resources.to_dict() if obj.resources else None
 
 
 class ExperimentDetailSerializer(ExperimentSerializer):
