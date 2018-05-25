@@ -15,6 +15,7 @@ export enum actionTypes {
 export interface ReceiveQueueExperimentsAction extends Action {
   type: actionTypes.RECEIVE_QUEUE_EXPERIMENTS;
   experiments: ExperimentModel[];
+  count: number;
 }
 
 export interface RequestQueueExperimentsAction extends Action {
@@ -31,10 +32,11 @@ export function requestQueueExperimentsActionCreator(): RequestQueueExperimentsA
   };
 }
 
-export function receiveQueueExperimentsActionCreator(experiments: ExperimentModel[]): ReceiveQueueExperimentsAction {
+export function receiveQueueExperimentsActionCreator(experiments: ExperimentModel[], count: number): ReceiveQueueExperimentsAction {
   return {
     type: actionTypes.RECEIVE_QUEUE_EXPERIMENTS,
-    experiments
+    experiments,
+    count
   };
 }
 
@@ -65,7 +67,6 @@ export function fetchQueueExperiments(currentPage?: number, orderBy?: string): a
     })
       .then(response => handleAuthError(response, dispatch))
       .then(response => response.json())
-      .then(json => json.results)
-      .then(json => dispatch(receiveQueueExperimentsActionCreator(json)));
+      .then(json => dispatch(receiveQueueExperimentsActionCreator(json.results, json.count)));
   };
 }

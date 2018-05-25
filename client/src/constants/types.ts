@@ -8,6 +8,7 @@ import { TokenStateSchema, TokenEmptyState } from '../models/token';
 import { ModalStateSchema } from '../models/modal';
 import { UserEmptyState, UserStateSchema } from '../models/user';
 import { PaginationStateSchema } from '../models/pagination';
+import { QueueStateSchema } from '../models/queue';
 
 export interface AppState {
   projects: ProjectStateSchema;
@@ -20,7 +21,7 @@ export interface AppState {
   form: FormReducer;
   pagination: PaginationStateSchema;
   logs: string;
-  queueExperiments: ExperimentModel[];
+  queueExperiments: QueueStateSchema;
 }
 
 export const AppEmptyState = {

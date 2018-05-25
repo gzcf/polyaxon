@@ -11,57 +11,10 @@ export interface Props {
   experiments: ExperimentModel[];
 }
 
-interface JobResources {
-  cpu?: {[key: string]: any};
-  gpu?: {[key: string]: any};
-  memory?: {[key: string]: any};
-  [key: string]: any;
-}
-interface Job {
-  uuid: string;
-  created_at: string;
-  experiment: string;
-  experiment_name: string;
-  finished_at: any;
-  is_done: boolean;
-  is_running: boolean;
-  last_status: string;
-  started_at: any;
-  unique_name: string;
-  updated_at: any;
-  role: string;
-  sequence: number;
-  resources?: JobResources;
-}
-interface Experiment {
-  uuid: string;
-  unique_name: string;
-  description?: any;
-  last_status: string;
-  last_metric: any;
-  started_at: string;
-  finished_at: any;
-  updated_at: string;
-  is_running: boolean;
-  is_done: boolean;
-  is_clone: boolean;
-
-  project: string;
-  experiment_group: string;
-  experiment_group_name: string;
-  num_jobs: number;
-  user: string;
-  project_name: string;
-  sequence: number;
-  created_at: string;
-  jobs?: Job[];
-}
-
 export default class Queue extends React.Component<Props, Object> {
 
   constructor(props: Props) {
     super(props);
-
   }
 
   public render() {

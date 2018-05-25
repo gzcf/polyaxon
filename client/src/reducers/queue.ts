@@ -1,15 +1,19 @@
 import { Reducer } from 'redux';
 import { QueueExperimentsAction, actionTypes } from '../actions/queue';
 import { ExperimentModel } from '../models/experiment';
+import { EmptyQueueState, QueueStateSchema } from '../models/queue';
 
-export const queueExperimentsReducer: Reducer<ExperimentModel[]> =
-  (state: ExperimentModel[] = [], action: QueueExperimentsAction) => {
+export const queueExperimentsReducer: Reducer<QueueStateSchema> =
+  (state: QueueStateSchema = EmptyQueueState, action: QueueExperimentsAction) => {
     switch (action.type) {
 
       case actionTypes.RECEIVE_QUEUE_EXPERIMENTS:
-        return action.experiments;
+        return {
+          experiments: action.experiments,
+          count: action.count
+        };
       case actionTypes.REQUEST_QUEUE_EXPERIMENTS:
-        return [];
+        return EmptyQueueState;
       default:
         return state;
     }

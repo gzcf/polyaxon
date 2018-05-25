@@ -6,8 +6,8 @@ import * as actions from '../actions/queue';
 
 export function mapStateToProps(state: AppState, params: any) {
   return {
-    experiments: state.queueExperiments,
-    count: 0
+    experiments: state.queueExperiments.experiments,
+    count: state.queueExperiments.count
   };
 }
 
@@ -17,7 +17,10 @@ export interface DispatchProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<any>, params: any): DispatchProps {
   return {
-    fetchData: () => dispatch(actions.fetchQueueExperiments())
+    fetchData: (currentPage?: number) => {
+      console.log(`currentPage = ${currentPage}`);
+      dispatch(actions.fetchQueueExperiments(currentPage))
+    }
   };
 }
 
