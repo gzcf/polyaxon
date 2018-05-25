@@ -43,7 +43,7 @@ export function receiveQueueExperimentsActionCreator(experiments: ExperimentMode
 export function fetchQueueExperiments(currentPage?: number, orderBy?: string): any {
   return (dispatch: any, getState: any) => {
     dispatch(requestQueueExperimentsActionCreator());
-    paginationActions.paginateExperiment(dispatch, currentPage);
+    paginationActions.paginateQueue(dispatch, currentPage);
     let experimentsUrl = `${BASE_URL}/experiments`;
     let filters: {[key: string]: number|boolean|string} = {
       is_running: '1'

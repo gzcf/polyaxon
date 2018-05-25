@@ -7,7 +7,8 @@ import * as actions from '../actions/queue';
 export function mapStateToProps(state: AppState, params: any) {
   return {
     experiments: state.queueExperiments.experiments,
-    count: state.queueExperiments.count
+    count: state.queueExperiments.count,
+    currentPage: state.pagination.queueCurrentPage
   };
 }
 

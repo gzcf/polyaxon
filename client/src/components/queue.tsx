@@ -10,6 +10,7 @@ export interface Props {
   count: number;
   fetchData: (currentPage?: number, ordreBy?: string) => any;
   experiments: ExperimentModel[];
+  currentPage: number;
 }
 
 interface State {
@@ -42,7 +43,7 @@ export default class Queue extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props, prevState: State) {
     if (this.state.orderByIndex != prevState.orderByIndex ||
         this.state.orderByDirection != prevState.orderByDirection) {
-      this.props.fetchData(1, this.getOrderBy());
+      this.props.fetchData(this.props.currentPage, this.getOrderBy());
     }
   }
 
