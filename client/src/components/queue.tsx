@@ -4,18 +4,62 @@ import PaginatedList from './paginatedList';
 import { JobModel } from '../models/job';
 import { getCssClassForStatus } from '../constants/utils';
 import { ExperimentModel } from '../models/experiment';
+import { DropdownButton, MenuItem, SelectCallback } from 'react-bootstrap';
 
 export interface Props {
   count: number;
-  fetchData: (currentPage: number) => any;
+  fetchData: (currentPage?: number, ordreBy?: string) => any;
   experiments: ExperimentModel[];
 }
 
-export default class Queue extends React.Component<Props, Object> {
+interface State {
+  orderByIndex: number;
+  orderByDirection: string;
+}
+
+export default class Queue extends React.Component<Props, State> {
+  fields: Array<{[key: string]: any}>;
 
   constructor(props: Props) {
     super(props);
+    this.state = {
+      orderByIndex: 2,
+      orderByDirection: 'DESC'
+    };
+
+    this.fields = [{
+      title: 'User',
+      field: 'user'
+    }, {
+      title: 'Project',
+      field: 'project'
+    }, {
+      title: 'Create Time',
+      field: 'created_at'
+    }];
   }
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.state.orderByIndex != prevState.orderByIndex ||
+        this.state.orderByDirection != prevState.orderByDirection) {
+      this.props.fetchData(1, this.getOrderBy());
+    }
+  }
+
+  getOrderBy() {
+    let symbol = this.state.orderByDirection === 'DESC' ? '-' : '';
+    return symbol + this.fields[this.state.orderByIndex].field;
+  }
+
+  orderByDirectionOnSelect: SelectCallback = (eventKey: any) => {
+    this.setState({
+      orderByDirection: eventKey
+    });
+  }
+
+  orderByOnSelect: SelectCallback = (eventKey: any) => {
+    this.setState({orderByIndex: eventKey});
+  };
 
   public render() {
 
@@ -110,12 +154,52 @@ export default class Queue extends React.Component<Props, Object> {
         </div>
       );
     };
+
+    const _fetchData =
+      (currentPage: number) => {
+        this.props.fetchData(currentPage, this.getOrderBy());
+      };
+
     return (
-      <PaginatedList
-        count={this.props.count}
-        componentList={listExperiments()}
-        fetchData={this.props.fetchData}
-      />
+      <div>
+        <div>
+          <span>
+            Order by：
+          </span>
+          <DropdownButton
+            bsStyle="default"
+            title={this.fields[this.state.orderByIndex].title}
+            key="1"
+            id="dropdown-order-by">
+            {
+              this.fields.map((field, index) =>
+                <MenuItem
+                  eventKey={index}
+                  onSelect={this.orderByOnSelect}
+                  active={index === this.state.orderByIndex}>
+                    {field.title}
+                </MenuItem>)
+            }
+          </DropdownButton>
+          <DropdownButton
+            bsStyle="default"
+            title={this.state.orderByDirection}
+            key="2"
+            id="dropdown-order-by-direction">
+            <MenuItem eventKey="ASC" onSelect={this.orderByDirectionOnSelect}>
+              ASC
+            </MenuItem>
+            <MenuItem eventKey="DESC" onSelect={this.orderByDirectionOnSelect}>
+              DESC
+            </MenuItem>
+          </DropdownButton>
+        </div>
+        <PaginatedList
+          count={this.props.count}
+          componentList={listExperiments()}
+          fetchData={_fetchData}
+        />
+      </div>
     );
   }
 }

@@ -17,9 +17,8 @@ export interface DispatchProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<any>, params: any): DispatchProps {
   return {
-    fetchData: (currentPage?: number) => {
-      console.log(`currentPage = ${currentPage}`);
-      dispatch(actions.fetchQueueExperiments(currentPage))
+    fetchData: (currentPage?: number, ordreBy?: string) => {
+      dispatch(actions.fetchQueueExperiments(currentPage, ordreBy));
     }
   };
 }
