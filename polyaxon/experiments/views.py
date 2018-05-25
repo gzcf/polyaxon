@@ -52,12 +52,14 @@ class ExperimentListView(ListAPIView):
     serializer_class = ExperimentSerializer
     permission_classes = (IsAuthenticated,)
     filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ('created_at', 'project__name', 'user__username')
 
     def get_queryset(self):
         queryset = Experiment.objects.all()
         is_running = utils.to_bool(self.request.query_params.get('is_running', False))
         if is_running:
             queryset = queryset.filter(experiment_status__status__in=ExperimentLifeCycle.RUNNING_STATUS)
+
         return queryset
 
 
@@ -73,6 +75,7 @@ class ProjectExperimentListView(ListCreateAPIView):
         filters = {}
         if independent is not None and to_bool(independent):
             filters['experiment_group__isnull'] = True
+
         return queryset.filter(project=get_permissible_project(view=self), **filters)
 
     def perform_create(self, serializer):

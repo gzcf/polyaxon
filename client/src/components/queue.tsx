@@ -30,10 +30,10 @@ export default class Queue extends React.Component<Props, State> {
 
     this.fields = [{
       title: 'User',
-      field: 'user'
+      field: 'user__username'
     }, {
       title: 'Project',
-      field: 'project'
+      field: 'project__name'
     }, {
       title: 'Create Time',
       field: 'created_at'
