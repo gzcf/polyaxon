@@ -1,7 +1,7 @@
 import { FormReducer } from 'redux-form';
 
 import { ProjectStateSchema, ProjectsEmptyState } from '../models/project';
-import { ExperimentStateSchema, ExperimentsEmptyState } from '../models/experiment';
+import { ExperimentStateSchema, ExperimentsEmptyState, ExperimentModel } from '../models/experiment';
 import { JobStateSchema, JobsEmptyState } from '../models/job';
 import { GroupStateSchema, GroupsEmptyState } from '../models/group';
 import { TokenStateSchema, TokenEmptyState } from '../models/token';
@@ -20,6 +20,7 @@ export interface AppState {
   form: FormReducer;
   pagination: PaginationStateSchema;
   logs: string;
+  queueExperiments: ExperimentModel[];
 }
 
 export const AppEmptyState = {

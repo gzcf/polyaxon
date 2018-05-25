@@ -12,6 +12,7 @@ import { modalReducer } from '../reducers/modal';
 import { userReducer } from '../reducers/user';
 import { PaginationReducer } from '../reducers/pagination';
 import { logsReducer } from './logs';
+import { queueExperimentsReducer } from './queue';
 
 const combinedReducer = combineReducers<AppState>({
   projects: projectsReducer,
@@ -23,7 +24,8 @@ const combinedReducer = combineReducers<AppState>({
   users: userReducer,
   form: formReducer,
   pagination: PaginationReducer,
-  logs: logsReducer
+  logs: logsReducer,
+  queueExperiments: queueExperimentsReducer
 });
 
 function SliceReducer(state: AppState, action: Action) {
@@ -37,7 +39,8 @@ function SliceReducer(state: AppState, action: Action) {
     users: UserProjectsReducer(state.users, action),
     form: state.form,
     pagination: state.pagination,
-    logs: state.logs
+    logs: state.logs,
+    queueExperiments: state.queueExperiments
   };
 }
 
