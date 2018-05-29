@@ -1,10 +1,9 @@
 import * as React from 'react';
 import * as Table from 'react-bootstrap/lib/Table';
 import PaginatedList from './paginatedList';
-import { JobModel } from '../models/job';
-import { getCssClassForStatus } from '../constants/utils';
+import './queue.less';
 import { ExperimentModel } from '../models/experiment';
-import { DropdownButton, MenuItem, SelectCallback } from 'react-bootstrap';
+import { SyntheticEvent } from 'react';
 
 export interface Props {
   count: number;
@@ -24,19 +23,31 @@ export default class Queue extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      orderByIndex: 2,
+      orderByIndex: 3,
       orderByDirection: 'DESC'
     };
 
     this.fields = [{
       title: 'User',
+      sortable: true,
       field: 'user__username'
     }, {
       title: 'Project',
+      sortable: true,
       field: 'project__name'
     }, {
+      title: 'Experiment Sequence',
+      sortable: false,
+    }, {
       title: 'Create Time',
+      sortable: true,
       field: 'created_at'
+    }, {
+      title: 'Status',
+      sortable: false,
+    }, {
+      title: 'Resources',
+      sortable: false,
     }];
   }
 
@@ -52,15 +63,17 @@ export default class Queue extends React.Component<Props, State> {
     return symbol + this.fields[this.state.orderByIndex].field;
   }
 
-  orderByDirectionOnSelect: SelectCallback = (eventKey: any) => {
-    this.setState({
-      orderByDirection: eventKey
-    });
+  formatDatetime(date: string) {
+    let d = new Date(date);
+    return d.toLocaleString();
   }
 
-  orderByOnSelect: SelectCallback = (eventKey: any) => {
-    this.setState({orderByIndex: eventKey});
-  };
+  headerOnToggle = (index: number, direction: string) => {
+    this.setState({
+      orderByIndex: index,
+      orderByDirection: direction
+    });
+  }
 
   public render() {
 
@@ -71,13 +84,23 @@ export default class Queue extends React.Component<Props, State> {
           <Table striped bordered condensed hover>
             <thead>
               <tr>
-                <th>User</th>
-                <th>Project</th>
-                <th>Experiment Sequence</th>
-                <th>Created Time</th>
-                <th>Status</th>
-                <th>Resources</th>
-                {/*<th>Jobs</th>*/}
+                {this.fields.map((field, index) => {
+                  if (field.sortable) {
+                    return (
+                      <th>
+                        <SortIndicator
+                          onToggle={this.headerOnToggle}
+                          eventKey={index}
+                          text={field.title}
+                          active={index === this.state.orderByIndex}
+                          defaultDirection={this.state.orderByDirection}
+                        />
+                      </th>
+                    );
+                  } else {
+                    return <th><span>{field.title}</span></th>
+                  }
+                })}
               </tr>
             </thead>
             <tbody>
@@ -87,7 +110,7 @@ export default class Queue extends React.Component<Props, State> {
                     <td>{xp.user}</td>
                     <td>{xp.project_name.split('.')[1]}</td>
                     <td>{xp.sequence}</td>
-                    <td>{xp.created_at}</td>
+                    <td>{this.formatDatetime(xp.created_at)}</td>
                     <td>{xp.last_status}</td>
                     <td>{xp.resources &&
                       <div className="meta meta-resources">
@@ -107,47 +130,6 @@ export default class Queue extends React.Component<Props, State> {
                       </div>
                       }
                     </td>
-                    {/*<td>{*/}
-                      {/*xp.jobs &&*/}
-                      {/*xp.jobs.map(job =>*/}
-                        {/*<div className="block">*/}
-                          {/*<div className="meta">*/}
-                            {/*<span className="meta-info">*/}
-                              {/*<i className="fa fa-certificate icon" aria-hidden="true"/>*/}
-                              {/*<span className="title">Role:</span>*/}
-                              {/*{job.role}*/}
-                            {/*</span>*/}
-                            {/*<span className="meta-info">*/}
-                              {/*<i className="fa fa-circle icon" aria-hidden="true"/>*/}
-                              {/*<span className="title">Sequence:</span>*/}
-                              {/*{job.sequence}*/}
-                            {/*</span>*/}
-                            {/*<span className="meta-info">*/}
-                              {/*<span className={`status alert-${getCssClassForStatus(job.last_status)}`}>*/}
-                                {/*{job.last_status}*/}
-                              {/*</span>*/}
-                            {/*</span>*/}
-                          {/*</div>*/}
-                          {/*{job.resources &&*/}
-                          {/*<div className="meta meta-resources">*/}
-                            {/*{Object.keys(job.resources)*/}
-                              {/*.filter(*/}
-                                {/*(res, idx) =>*/}
-                                  {/*job.resources![res] != null*/}
-                              {/*)*/}
-                              {/*.map(*/}
-                              {/*(res, idx) =>*/}
-                                {/*<span className="meta-info" key={idx}>*/}
-                                  {/*<i className="fa fa-microchip icon" aria-hidden="true"/>*/}
-                                  {/*<span className="title">{res}:</span>*/}
-                                  {/*{job.resources![res].requests || ''} - {job.resources![res].limits || ''}*/}
-                                {/*</span>*/}
-                            {/*)}*/}
-                          {/*</div>*/}
-                          {/*}*/}
-                        {/*</div>*/}
-                      {/*)}*/}
-                    {/*</td>*/}
                   </tr>)
               }
             </tbody>
@@ -163,43 +145,85 @@ export default class Queue extends React.Component<Props, State> {
 
     return (
       <div>
-        <div>
-          <span>
-            Order by：
-          </span>
-          <DropdownButton
-            bsStyle="default"
-            title={this.fields[this.state.orderByIndex].title}
-            key="1"
-            id="dropdown-order-by">
-            {
-              this.fields.map((field, index) =>
-                <MenuItem
-                  eventKey={index}
-                  onSelect={this.orderByOnSelect}
-                  active={index === this.state.orderByIndex}>
-                    {field.title}
-                </MenuItem>)
-            }
-          </DropdownButton>
-          <DropdownButton
-            bsStyle="default"
-            title={this.state.orderByDirection}
-            key="2"
-            id="dropdown-order-by-direction">
-            <MenuItem eventKey="ASC" onSelect={this.orderByDirectionOnSelect}>
-              ASC
-            </MenuItem>
-            <MenuItem eventKey="DESC" onSelect={this.orderByDirectionOnSelect}>
-              DESC
-            </MenuItem>
-          </DropdownButton>
-        </div>
         <PaginatedList
           count={this.props.count}
           componentList={listExperiments()}
           fetchData={_fetchData}
         />
+      </div>
+    );
+  }
+}
+
+enum Direction {
+  ASC = 'ASC',
+  DESC = 'DESC',
+  NONE = 'NONE'
+}
+
+interface SortIndicatorProps {
+  text: string;
+  active?: boolean;
+  eventKey: any;
+  onToggle: (key: any, direction: string) => any;
+  defaultDirection?: string;
+}
+
+interface SortIndicatorState {
+  direction: Direction;
+}
+
+class SortIndicator extends React.Component<SortIndicatorProps, SortIndicatorState> {
+  constructor(props: SortIndicatorProps) {
+    super(props);
+    if (this.props.active) {
+      if (this.props.defaultDirection) {
+        if (this.props.defaultDirection === 'ASC') {
+          this.state = {direction: Direction.ASC};
+        } else {
+          this.state = {direction: Direction.DESC};
+        }
+      } else {
+        this.state = {direction: Direction.ASC};
+      }
+    } else {
+      this.state = {direction: Direction.NONE};
+    }
+  }
+
+  onClick = (e: SyntheticEvent<any>) => {
+    this.setState((prevState, props): SortIndicatorState => {
+      let direction: Direction;
+      if (props.active) {
+        if (prevState.direction === Direction.ASC)
+          direction = Direction.DESC;
+        else
+          direction = Direction.ASC;
+      } else {
+        direction = Direction.ASC;
+      }
+      this.props.onToggle(this.props.eventKey, direction as string);
+      return {
+        direction: direction
+      };
+    });
+  }
+
+  public render() {
+    const active = this.props.active;
+    const direction = this.state.direction;
+    let className;
+    if (!active) {
+      className = 'inactive';
+    } else if (direction === Direction.ASC) {
+      className = 'asc';
+    } else {
+      className = 'desc';
+    }
+    return (
+      <div onClick={this.onClick}>
+        <span>{this.props.text}</span>
+        <span className={`sort-indicator ${className}`} />
       </div>
     );
   }
