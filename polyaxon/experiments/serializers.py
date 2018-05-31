@@ -119,7 +119,10 @@ class ExperimentSerializer(serializers.ModelSerializer):
         return {k: round(v, 7) for k, v in obj.last_metric.items()} if obj.last_metric else None
 
     def get_resources(self, obj):
-        return obj.resources.to_dict() if obj.resources else None
+        resources = obj.resources
+        if resources and not isinstance(resources, dict):
+            resources = resources.to_dict()
+        return resources
 
 
 class ExperimentDetailSerializer(ExperimentSerializer):

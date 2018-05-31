@@ -3,6 +3,8 @@ from __future__ import absolute_import, division, print_function
 
 from unittest.mock import patch
 
+from polyaxon_schemas.polyaxonfile.specification import Specification
+
 from experiments.models import ExperimentStatus, Experiment, ExperimentJob
 from experiments.serializers import (
     ExperimentStatusSerializer,
@@ -104,6 +106,40 @@ class TestExperimentSerializer(BaseTest):
         assert len(data) == 2
         for d in data:
             assert set(d.keys()) == self.expected_keys
+
+    def test_serialize_cluster_resources(self):
+        spec_content = """---
+            version: 1
+
+            project:
+              name: project1
+
+            environment:
+              resources:
+                cpu:
+                  requests: 2
+                  limits: 4
+                memory:
+                  requests: 4096
+                  limits: 10240
+              pytorch:
+                n_workers: 2
+                default_worker_resources:
+                  cpu:
+                    requests: 2
+                    limits: 4
+                  memory:
+                    requests: 4096
+                    limits: 10240
+
+            run:
+              image: my_image
+              cmd: video_prediction_train --model=DNA --num_masks=1
+        """
+        spec = Specification.read(spec_content)
+
+        obj = self.factory_class(config=spec.parsed_data)
+        data = self.serializer_class(obj).data
 
 
 class TestExperimentDetailSerializer(BaseTest):
