@@ -55,8 +55,8 @@ def get_gpu_volumes_def(resources):
     return volume_mounts, volumes
 
 
-def get_volume_mount(volume, volume_mount=None):
-    return client.V1VolumeMount(name=volume, mount_path=volume_mount)
+def get_volume_mount(volume, volume_mount=None, read_only=False):
+    return client.V1VolumeMount(name=volume, mount_path=volume_mount, read_only=read_only)
 
 
 def get_volume(volume, claim_name=None, volume_mount=None):
