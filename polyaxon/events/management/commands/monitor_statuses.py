@@ -4,9 +4,8 @@ from __future__ import absolute_import, division, print_function
 import time
 
 from django.conf import settings
-
+from django.db import InterfaceError, connection
 from kubernetes.client.rest import ApiException
-
 from polyaxon_k8s.manager import K8SManager
 
 from events.management.commands._base_monitor import BaseMonitorCommand
@@ -30,5 +29,12 @@ class Command(BaseMonitorCommand):
                 statuses.logger.error(
                     "Exception when calling CoreV1Api->list_namespaced_pod: %s\n" % e)
                 time.sleep(log_sleep_interval)
+            except InterfaceError:
+                # In some cases such as timeout, database restart, connection will be closed by remote peer.
+                # Django cannot recover from this condition automatically.
+                # Here we close dead connection manually, make Django to reconnect next time querying DB.
+                connection.close()
+                statuses.logger.warn(
+                    "Database connection is already closed by peer, discard old connection\n")
             except Exception as e:
                 statuses.logger.exception("Unhandled exception occurred %s\n" % e)
