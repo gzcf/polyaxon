@@ -19,3 +19,4 @@ from .versions import *
 from .registration import *
 from .paths import *
 from .auth import *
+from .auth_linkdoc import *
