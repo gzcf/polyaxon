@@ -6,6 +6,8 @@ import logging
 import time
 import os
 import stat
+import uuid
+
 import jinja2
 
 from django.conf import settings
@@ -36,6 +38,8 @@ class BaseDockerBuilder(object):
                  steps=None,
                  env_vars=None,
                  dockerfile_name='Dockerfile'):
+        # This will help create a unique tmp folder for dockerizer in case of concurrent jobs
+        self.uuid = uuid.uuid4().hex
         self.from_image = from_image
         self.image_name = image_name
         self.image_tag = image_tag
@@ -58,7 +62,8 @@ class BaseDockerBuilder(object):
 
     def create_tmp_repo(self):
         # Create a tmp copy of the repo before starting the build
-        return copy_to_tmp_dir(self.repo_path, os.path.join(self.image_tag, self.folder_name))
+        return copy_to_tmp_dir(path=self.repo_path,
+                               dir_name=os.path.join(self.uuid, self.image_tag, self.folder_name))
 
     def clean(self):
         # Clean dockerfile
