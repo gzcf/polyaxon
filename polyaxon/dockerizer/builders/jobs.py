@@ -6,6 +6,7 @@ import logging
 from django.conf import settings
 
 from dockerizer.builders.base import BaseDockerBuilder
+from dockerizer.builders.utils import login_external_registries
 from libs.registry import get_registry_host
 from repos import git
 from repos.models import Repo, ExternalRepo
@@ -97,6 +98,7 @@ def build_job(project, job, job_builder, image_tag=None):
     docker_builder.login(registry_user=settings.REGISTRY_USER,
                          registry_password=settings.REGISTRY_PASSWORD,
                          registry_host=get_registry_host())
+    login_external_registries(docker_builder)
     if not docker_builder.build():
         docker_builder.clean()
         return False

@@ -3,11 +3,14 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import uuid
+from pathlib import Path
+from unittest.mock import MagicMock
 
 from django.conf import settings
-from pathlib import Path
+from django.test import override_settings
 
 from dockerizer.builders.experiments import ExperimentDockerBuilder
+from dockerizer.builders.utils import login_external_registries
 from tests.utils import BaseTest
 
 
@@ -100,3 +103,23 @@ class TestRepoDockerize(BaseTest):
         assert 'RUN {}'.format(steps[0]) in dockerfile
         assert 'RUN {}'.format(steps[1]) in dockerfile
         builder.clean()
+
+    def test_login_external_registries(self):
+        with override_settings(
+            EXTERNAL_REGISTRIES = [{'host': 'reg.com', 'username': 'user', 'password': '123456'}]
+        ):
+            docker_builder = MagicMock()
+            login_external_registries(docker_builder)
+            docker_builder.login.assert_called_once_with(registry_user='user',
+                                                         registry_password='123456',
+                                                         registry_host='reg.com')
+
+        with override_settings(EXTERNAL_REGISTRIES=None):
+            docker_builder = MagicMock()
+            login_external_registries(docker_builder)
+            docker_builder.login.assert_not_called()
+
+        with override_settings(EXTERNAL_REGISTRIES=''):
+            docker_builder = MagicMock()
+            login_external_registries(docker_builder)
+            docker_builder.login.assert_not_called()
