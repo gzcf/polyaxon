@@ -161,6 +161,8 @@ class BaseDockerBuilder(object):
             stream=True,
         ):
             self._handle_logs(log_line)
+            if 'error' in log_line:
+                return False
             # Check if we need to stop this process
             check_pulse, should_stop = self._check_pulse(check_pulse)
             if should_stop:

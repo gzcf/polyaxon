@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+import traceback
 
 from django.db.models import Count
 from docker.errors import DockerException
@@ -68,6 +69,11 @@ def build_experiment(self, experiment_id):
         logger.warning('No code was found for this project')
         experiment.set_status(ExperimentLifeCycle.FAILED,
                               message='No code was found for to build this experiment.')
+        return
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        experiment.set_status(ExperimentLifeCycle.FAILED,
+                              message='Unexpected error %s' % e)
         return
 
     if not status:
