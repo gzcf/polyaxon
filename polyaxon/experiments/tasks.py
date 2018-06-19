@@ -77,6 +77,8 @@ def build_experiment(self, experiment_id):
         return
 
     if not status:
+        experiment.set_status(ExperimentLifeCycle.FAILED,
+                              message='Failed to build image for experiment.')
         return
 
     # Now we can start the experiment
