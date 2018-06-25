@@ -202,6 +202,17 @@ class PodManager(object):
             if resources.gpu and not settings.LD_LIBRARY_PATH:
                 logger.warning('`LD_LIBRARY_PATH` was not properly set.')  # Publish error
 
+        # Fix https://github.com/kubernetes/kubernetes/issues/59629
+        # When resources.gpu.limits is not set or set to 0, we explicitly pass NVIDIA_VISIBLE_DEVICES=none into
+        # container to avoid exposing GPUs.
+        if not resources or not resources.gpu or not resources.gpu.limits or resources.gpu.limits == '0':
+            env_vars.append(
+                client.V1EnvVar(
+                    name='NVIDIA_VISIBLE_DEVICES',
+                    value='none'
+                )
+            )
+
         ports = [client.V1ContainerPort(container_port=port) for port in self.ports]
         return client.V1Container(name=self.job_container_name,
                                   image=self.job_docker_image,
