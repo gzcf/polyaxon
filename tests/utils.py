@@ -13,7 +13,9 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.core.cache import cache
-from django.test import Client, TestCase
+from django.core.management import call_command
+from django.db import connections
+from django.test import Client, TestCase, TransactionTestCase
 from django.test.client import FakePayload
 from rest_framework import status
 
@@ -139,7 +141,7 @@ class AuthorizedClient(Client):
         return request
 
 
-class BaseTest(TestCase):
+class BaseTestMixin(object):
     def setUp(self):
         # Flushing all redis databases
         redis.Redis(connection_pool=RedisPools.JOB_CONTAINERS).flushall()
@@ -154,7 +156,39 @@ class BaseTest(TestCase):
         return super().setUp()
 
 
-class BaseViewTest(BaseTest):
+class BaseTest(BaseTestMixin, TestCase):
+    pass
+
+
+class BaseTransactionTest(BaseTestMixin, TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        type(self).setUpTestData()
+
+    @classmethod
+    def setUpTestData(cls):
+        """Load initial data."""
+        pass
+
+    def _fixture_teardown(self):
+        # Override SimpleTestCase._fixture_teardown, force TRUNCATE ... CASCADE
+        for db_name in self._databases_names(include_mirrors=False):
+            # Flush the database
+            inhibit_post_migrate = (
+                self.available_apps is not None or
+                (   # Inhibit the post_migrate signal when using serialized
+                    # rollback to avoid trying to recreate the serialized data.
+                    self.serialized_rollback and
+                    hasattr(connections[db_name], '_test_serialized_contents')
+                )
+            )
+            call_command('flush', verbosity=0, interactive=False,
+                         database=db_name, reset_sequences=False,
+                         allow_cascade=True,
+                         inhibit_post_migrate=inhibit_post_migrate)
+
+
+class BaseViewTestMixin(object):
     """This is the base test for all tests.
 
     Also mocks common external calls, e.g. for tracking or related to auth.
@@ -173,8 +207,8 @@ class BaseViewTest(BaseTest):
             cls.auth_client = AuthorizedClient()
 
     def setUp(self):
-        assert hasattr(self, 'auth_client') and self.auth_client is not None
         super().setUp()
+        assert hasattr(self, 'auth_client') and self.auth_client is not None
 
     def test_requires_auth(self):
         # Test unauthorized access to view
@@ -182,3 +216,11 @@ class BaseViewTest(BaseTest):
             assert hasattr(self, 'url'), 'Cannot check auth if url is not set.'
             assert self.client.get(self.url).status_code in (status.HTTP_401_UNAUTHORIZED,
                                                              status.HTTP_403_FORBIDDEN)
+
+
+class BaseViewTest(BaseViewTestMixin, BaseTest):
+    pass
+
+
+class BaseTransactionViewTest(BaseViewTestMixin, BaseTransactionTest):
+    pass

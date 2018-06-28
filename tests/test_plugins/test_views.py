@@ -20,10 +20,10 @@ from spawners.tensorboard_spawner import TensorboardSpawner
 from spawners.notebook_spawner import NotebookSpawner
 from spawners.templates.constants import DEPLOYMENT_NAME
 from spawners.utils.constants import JobLifeCycle
-from tests.utils import BaseViewTest
+from tests.utils import BaseViewTest, BaseTransactionViewTest
 
 
-class TestStartTensorboardViewV1(BaseViewTest):
+class TestStartTensorboardViewV1(BaseTransactionViewTest):
     model_class = Project
     factory_class = ProjectFactory
     HAS_AUTH = True
@@ -140,7 +140,7 @@ class TestStopTensorboardViewV1(BaseViewTest):
         assert self.queryset.count() == 1
 
 
-class TestStartNotebookViewV1(BaseViewTest):
+class TestStartNotebookViewV1(BaseTransactionViewTest):
     model_class = Project
     factory_class = ProjectFactory
     HAS_AUTH = True

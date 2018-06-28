@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 from django.conf import settings
+from django.db import transaction
 from django.http import Http404
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -61,7 +62,7 @@ class StartTensorboardView(CreateAPIView):
         if not obj.has_tensorboard:
             self._create_tensorboard(obj)
             if not obj.tensorboard.is_running:
-                start_tensorboard.delay(project_id=obj.id)
+                transaction.on_commit(lambda: start_tensorboard.delay(project_id=obj.id))
         return Response(status=status.HTTP_200_OK)
 
 
@@ -112,7 +113,8 @@ class StartNotebookView(CreateAPIView):
         if not obj.has_notebook:
             self._create_notebook(obj)
             if not obj.notebook.is_running:
-                build_notebook.delay(project_id=obj.id)
+                transaction.on_commit(lambda: build_notebook.delay(project_id=obj.id))
+
         return Response(status=status.HTTP_200_OK)
 
 
