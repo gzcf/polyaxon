@@ -161,15 +161,6 @@ class BaseTest(BaseTestMixin, TestCase):
 
 
 class BaseTransactionTest(BaseTestMixin, TransactionTestCase):
-    def setUp(self):
-        super().setUp()
-        type(self).setUpTestData()
-
-    @classmethod
-    def setUpTestData(cls):
-        """Load initial data."""
-        pass
-
     def _fixture_teardown(self):
         # Override SimpleTestCase._fixture_teardown, force TRUNCATE ... CASCADE
         for db_name in self._databases_names(include_mirrors=False):
@@ -197,18 +188,16 @@ class BaseViewTestMixin(object):
     HAS_AUTH = False
     ADMIN_USER = False
 
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        if cls.ADMIN_USER:
+    def setUpAuthClient(self):
+        if self.ADMIN_USER:
             user = UserFactory(is_staff=True, is_superuser=True)
-            cls.auth_client = AuthorizedClient(user=user)
+            self.auth_client = AuthorizedClient(user=user)
         else:
-            cls.auth_client = AuthorizedClient()
+            self.auth_client = AuthorizedClient()
 
     def setUp(self):
         super().setUp()
-        assert hasattr(self, 'auth_client') and self.auth_client is not None
+        self.setUpAuthClient()
 
     def test_requires_auth(self):
         # Test unauthorized access to view
