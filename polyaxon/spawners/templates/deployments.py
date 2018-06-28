@@ -37,6 +37,9 @@ def get_project_pod_spec(volume_mounts,
     volume_mounts += gpu_volume_mounts
     volumes += gpu_volumes
 
+    env_vars = get_list(env_vars)
+    env_vars += pods.get_resources_env_vars(resources)
+
     ports = [client.V1ContainerPort(container_port=port) for port in ports]
 
     containers = [client.V1Container(name=container_name,
