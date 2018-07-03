@@ -7,6 +7,8 @@ RUN apt-get -y update && \
     apt-get -y install nginx && \
     apt-get -y install libldap2-dev libsasl2-dev
 
+RUN mkdir -p /root/.pip
+COPY pip.conf /root/.pip/
 
 COPY requirements.txt /setup/
 COPY requirements-dev.txt /setup/
