@@ -41,6 +41,7 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
     if (!_.isNil(experiment.experiment_group_name)) {
       group = parseInt(splitGroupName(experiment.experiment_group_name)[2], 10);
     }
+    let cmd = experiment.config && experiment.config.run ? experiment.config.run.cmd : null;
     return (
       <div className="row">
         <div className="col-md-12">
@@ -149,6 +150,8 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
               <Col sm={12}>
                 <Tab.Content animation={true} mountOnEnter={true}>
                   <Tab.Pane eventKey={1}>
+                    <h4 className="polyaxon-header">Cmd</h4>
+                    <pre>{cmd}</pre>
                     <h4 className="polyaxon-header">Jobs</h4>
                     <Jobs fetchData={() => null} user={experiment.user} experiment={experiment}/>
                     <h4 className="polyaxon-header">Logs</h4>

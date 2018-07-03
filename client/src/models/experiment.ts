@@ -20,6 +20,7 @@ export class ExperimentModel {
   public last_metric: {[metric: string]: number};
   public resources: {[key: string]: any};
   public jobs: Array<string> = [];
+  public config: {[key: string]: any};
 }
 
 export class ExperimentStateSchema {
