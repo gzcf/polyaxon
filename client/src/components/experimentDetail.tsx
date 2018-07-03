@@ -15,6 +15,8 @@ import {
   getCssClassForStatus,
 } from '../constants/utils';
 import TaskRunMetaInfo from './taskRunMetaInfo';
+import ExperimentInstructions from './instructions/experimentInstructions';
+import { Col, Nav, NavItem, Row, Tab } from 'react-bootstrap';
 
 export interface Props {
   experiment: ExperimentModel;
@@ -135,10 +137,31 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
             </div>
             }
           </div>
-          <h4 className="polyaxon-header">Jobs</h4>
-          <Jobs fetchData={() => null} user={experiment.user} experiment={experiment}/>
-          <h4 className="polyaxon-header">Logs</h4>
-          <Logs fetchData={() => null} logs={''} user={experiment.user} experiment={experiment}/>
+
+          <Tab.Container defaultActiveKey={1} id="experiment-tabs" className="plx-nav">
+            <Row className="clearfix">
+              <Col sm={12}>
+                <Nav bsStyle="tabs">
+                  <NavItem eventKey={1}>Overview</NavItem>
+                  <NavItem eventKey={2}>Instructions</NavItem>
+                </Nav>
+              </Col>
+              <Col sm={12}>
+                <Tab.Content animation={true} mountOnEnter={true}>
+                  <Tab.Pane eventKey={1}>
+                    <h4 className="polyaxon-header">Jobs</h4>
+                    <Jobs fetchData={() => null} user={experiment.user} experiment={experiment}/>
+                    <h4 className="polyaxon-header">Logs</h4>
+                    <Logs fetchData={() => null} logs={''} user={experiment.user} experiment={experiment}/>
+                  </Tab.Pane>
+                  <Tab.Pane eventKey={2}>
+                    <ExperimentInstructions id={experiment.sequence}/>
+                  </Tab.Pane>
+                </Tab.Content>
+              </Col>
+            </Row>
+          </Tab.Container>
+
         </div>
       </div>
     );

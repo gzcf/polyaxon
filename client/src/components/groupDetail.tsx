@@ -1,11 +1,13 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import { Tab, Nav, NavItem, Col, Row } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
 import { GroupModel } from '../models/group';
 import Experiments from '../containers/experiments';
 import { getProjectUrl, getUserUrl, splitProjectName } from '../constants/utils';
+import GroupInstructions from './instructions/groupInstructions';
 
 export interface Props {
   group: GroupModel;
@@ -106,8 +108,28 @@ export default class GroupDetail extends React.Component<Props, Object> {
               </span>
             </div>
           </div>
-          <h4 className="polyaxon-header">Experiments</h4>
-          <Experiments user={group.user} projectName={group.project_name} groupSequence={group.sequence}/>
+
+          <Tab.Container defaultActiveKey={1} id="experiment-tabs" className="plx-nav">
+            <Row className="clearfix">
+              <Col sm={12}>
+                <Nav bsStyle="tabs">
+                  <NavItem eventKey={1}>Experiments</NavItem>
+                  <NavItem eventKey={2}>Instructions</NavItem>
+                </Nav>
+              </Col>
+              <Col sm={12}>
+                <Tab.Content animation={true} mountOnEnter={true}>
+                  <Tab.Pane eventKey={1}>
+                    <Experiments user={group.user} projectName={group.project_name} groupSequence={group.sequence}/>
+                  </Tab.Pane>
+                  <Tab.Pane eventKey={2}>
+                    <GroupInstructions id={group.sequence}/>
+                  </Tab.Pane>
+                </Tab.Content>
+              </Col>
+            </Row>
+          </Tab.Container>
+
         </div>
       </div>
     );

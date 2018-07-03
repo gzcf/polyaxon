@@ -8,6 +8,7 @@ import { ProjectModel } from '../models/project';
 import Experiments from '../containers/experiments';
 import Groups from '../containers/groups';
 import { getNotebookUrl, getTensorboardUrl, getUserUrl } from '../constants/utils';
+import ProjectInstructions from './instructions/projectInstructions';
 
 export interface Props {
   project: ProjectModel;
@@ -89,6 +90,7 @@ export default class ProjectDetail extends React.Component<Props, Object> {
                 <Nav bsStyle="tabs">
                   <NavItem eventKey={1}>Independent Experiments</NavItem>
                   <NavItem eventKey={2}>Experiment groups</NavItem>
+                  <NavItem eventKey={3}>Instructions</NavItem>
                 </Nav>
               </Col>
               <Col sm={12}>
@@ -98,6 +100,9 @@ export default class ProjectDetail extends React.Component<Props, Object> {
                   </Tab.Pane>
                   <Tab.Pane eventKey={2}>
                     <Groups user={project.user} projectName={project.unique_name}/>
+                  </Tab.Pane>
+                  <Tab.Pane eventKey={3}>
+                    <ProjectInstructions projectName={project.name}/>
                   </Tab.Pane>
                 </Tab.Content>
               </Col>
