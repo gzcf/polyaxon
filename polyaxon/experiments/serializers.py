@@ -95,7 +95,7 @@ class ExperimentSerializer(serializers.ModelSerializer):
             'uuid', 'unique_name', 'user', 'sequence', 'description', 'created_at', 'updated_at',
             'last_status', 'last_metric', 'started_at', 'finished_at', 'is_running', 'is_done',
             'is_clone', 'project', 'project_name', 'experiment_group',
-            'experiment_group_name', 'num_jobs', 'resources')
+            'experiment_group_name', 'num_jobs', 'resources', 'config')
 
     def get_user(self, obj):
         return obj.user.username
@@ -130,8 +130,8 @@ class ExperimentDetailSerializer(ExperimentSerializer):
 
     class Meta(ExperimentSerializer.Meta):
         fields = ExperimentSerializer.Meta.fields + (
-            'content', 'config', 'original', 'original_experiment',
-            'description', 'config', 'declarations'
+            'content', 'original', 'original_experiment',
+            'declarations'
         )
         extra_kwargs = {'original_experiment': {'write_only': True}}
 

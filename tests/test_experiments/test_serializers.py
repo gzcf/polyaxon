@@ -31,7 +31,7 @@ class TestExperimentSerializer(BaseTest):
         'uuid', 'user', 'unique_name', 'sequence', 'description', 'created_at', 'updated_at',
         'last_status', 'last_metric', 'started_at', 'finished_at', 'is_running', 'is_done',
         'is_clone', 'project', 'project_name', 'experiment_group',
-        'experiment_group_name', 'num_jobs', 'resources'}
+        'experiment_group_name', 'num_jobs', 'resources', 'config'}
 
     def setUp(self):
         super().setUp()

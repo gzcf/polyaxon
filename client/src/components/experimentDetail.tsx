@@ -29,6 +29,10 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
     this.props.fetchData();
   }
 
+  private formatCmd(cmd: string) {
+    return cmd.replace(/\\\\/g, '');
+  }
+
   public render() {
     const experiment = this.props.experiment;
 
@@ -41,7 +45,7 @@ export default class ExperimentDetail extends React.Component<Props, Object> {
     if (!_.isNil(experiment.experiment_group_name)) {
       group = parseInt(splitGroupName(experiment.experiment_group_name)[2], 10);
     }
-    let cmd = experiment.config && experiment.config.run ? experiment.config.run.cmd : null;
+    let cmd = experiment.config.run ? this.formatCmd(experiment.config.run.cmd) : ' ';
     return (
       <div className="row">
         <div className="col-md-12">
