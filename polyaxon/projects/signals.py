@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import os
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
@@ -13,7 +14,7 @@ from projects.paths import (
     delete_project_logs,
     delete_experiment_group_logs,
     delete_project_repos,
-)
+    delete_project_data, get_project_data_path)
 from schedulers import experiment_scheduler, notebook_scheduler, tensorboard_scheduler
 
 
@@ -60,9 +61,13 @@ def new_project(sender, **kwargs):
         return
 
     # Clean outputs, logs, and repos
-    delete_project_outputs(instance.unique_name)
-    delete_project_logs(instance.unique_name)
-    delete_project_repos(instance.unique_name)
+    unique_name = instance.unique_name
+    delete_project_outputs(unique_name)
+    delete_project_logs(unique_name)
+    delete_project_repos(unique_name)
+    delete_project_data(unique_name)
+
+    os.makedirs(get_project_data_path(unique_name), exist_ok=True)
 
 
 @receiver(pre_delete, sender=Project, dispatch_uid="project_deleted")
@@ -80,6 +85,8 @@ def project_deleted(sender, **kwargs):
         instance.notebook.delete()
 
     # Clean outputs, logs, and repos
-    delete_project_outputs(instance.unique_name)
-    delete_project_logs(instance.unique_name)
-    delete_project_repos(instance.unique_name)
+    unique_name = instance.unique_name
+    delete_project_outputs(unique_name)
+    delete_project_logs(unique_name)
+    delete_project_repos(unique_name)
+    delete_project_data(unique_name)

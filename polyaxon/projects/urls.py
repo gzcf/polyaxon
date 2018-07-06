@@ -36,6 +36,8 @@ projects_urlpatterns = [
         views.ExperimentGroupStopView.as_view()),
     url(r'^{}/{}/groups/{}/experiments/?$'.format(USERNAME_PATTERN, NAME_PATTERN, SEQUENCE_PATTERN),
         experiments_views.GroupExperimentListView.as_view()),
+    url(r'^{}/{}/data?$'.format(USERNAME_PATTERN, NAME_PATTERN),
+        views.UploadDataView.as_view()),
 ]
 
 # Order is important, because the patterns could swallow other urls

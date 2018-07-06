@@ -2,19 +2,22 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-
+import os
 import random
+import tarfile
 
 from docker.errors import DockerException
 from polyaxon_schemas.utils import SEARCH_METHODS
 
-from experiments.models import Experiment
-from polyaxon.settings import CeleryTasks, Intervals
-from polyaxon.celery_api import app as celery_app
-from experiments.tasks import build_experiment, stop_experiment
-from projects.models import ExperimentGroup, Project
 from dockerizer.builders import notebooks as notebooks_builder
 from dockerizer.images import get_notebook_image_info
+from experiments.models import Experiment
+from experiments.tasks import build_experiment, stop_experiment
+from libs.paths import delete_path
+from polyaxon.celery_api import app as celery_app
+from polyaxon.settings import CeleryTasks, Intervals
+from projects.models import ExperimentGroup, Project
+from projects.paths import get_project_data_path
 from repos.models import Repo
 from schedulers import notebook_scheduler, tensorboard_scheduler
 from spawners.utils.constants import JobLifeCycle, ExperimentLifeCycle
@@ -191,3 +194,36 @@ def stop_notebook(project_id):
         return None
 
     notebook_scheduler.stop_notebook(project, update_status=True)
+
+
+@celery_app.task(name=CeleryTasks.PROJECTS_HANDLE_DATA_UPLOAD, ignore_result=True)
+def handle_new_data(project_id, tar_file_name):
+    if not tarfile.is_tarfile(tar_file_name):
+        raise ValueError('Received wrong file format.')
+
+    try:
+        project = Project.objects.get(id=project_id)
+    except Project.DoesNotExist:
+        logger.warning('Repo with id `{}` does not exist anymore.'.format(project_id))
+        return
+
+    data_path = get_project_data_path(project.unique_name)
+    logger.info('Extract tar file: tar_file_name=%s, data_path=%s', tar_file_name, data_path)
+
+    os.makedirs(data_path, exist_ok=True)
+
+    # clean the current path from all files
+    path_files = os.listdir(data_path)
+    for member in path_files:
+        member = os.path.join(data_path, member)
+        if os.path.isfile(member):
+            os.remove(member)
+        else:
+            delete_path(member)
+
+    # Untar the file
+    with tarfile.open(tar_file_name) as tar:
+        tar.extractall(data_path)
+
+    # Delete the current tar
+    os.remove(tar_file_name)

@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import json
 from unittest.mock import patch
 
+import os
+from django.conf import settings
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test.client import MULTIPART_CONTENT
 from flaky import flaky
 from rest_framework import status
 
@@ -193,8 +199,8 @@ class TestProjectDetailViewV1(BaseViewTest):
         assert xp_mock_stop.call_count == 4
         assert tensorboard_mock_fct.call_count == 1
         assert notebook_mock_fct.call_count == 1
-        # 2 * project + 2 * 2 * groups + 1 repo
-        assert delete_path_project_mock_stop.call_count == 7
+        # 2 * project + 2 * 2 * groups + 1 repo + 1 data
+        assert delete_path_project_mock_stop.call_count == 8
         assert delete_path_xp_mock_stop.call_count == 8  # 2 * 4  * groups
         assert resp.status_code == status.HTTP_204_NO_CONTENT
         assert self.queryset.count() == 0
@@ -386,3 +392,38 @@ class TestStopExperimentGroupViewV1(BaseViewTest):
         resp = self.auth_client.post(self.url, data)
         assert resp.status_code == status.HTTP_200_OK
         assert self.object.stopped_experiments.count() == 2
+
+
+def get_upload_file(filename='repo'):
+    file = File(open('./tests/fixtures_static/{}.tar.gz'.format(filename), 'rb'))
+    return SimpleUploadedFile(filename, file.read(),
+                              content_type='multipart/form-data')
+
+
+class TestUploadDataView(BaseViewTest):
+    model_class = Project
+    factory_class = ProjectFactory
+    HAS_AUTH = True
+
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory(user=self.auth_client.user)
+        self.url = '/{}/{}/{}/data'.format(
+            API_V1,
+            self.project.user.username,
+            self.project.name
+        )
+
+    def test_put(self):
+        user = self.auth_client.user
+
+        data_path = '{}/{}/{}'.format(settings.DATA_ROOT, user.username, self.project.name)
+
+        uploaded_file = get_upload_file()
+
+        self.auth_client.put(self.url,
+                             data={'data': uploaded_file, 'json': json.dumps({'async': False})},
+                             content_type=MULTIPART_CONTENT)
+
+        self.assertTrue(os.path.exists(data_path))
+        assert set(os.listdir(data_path)) == {'f1', 'f2'}

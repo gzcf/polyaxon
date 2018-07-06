@@ -47,6 +47,11 @@ def delete_project_repos(project_name):
     delete_path(path)
 
 
+def delete_project_data(project_name):
+    path = get_project_data_path(project_name)
+    delete_path(path)
+
+
 def delete_experiment_group_outputs(experiment_group_name):
     path = get_experiment_group_outputs_path(experiment_group_name)
     delete_path(path)

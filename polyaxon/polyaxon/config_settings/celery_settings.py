@@ -74,6 +74,7 @@ class CeleryTasks(object):
     PROJECTS_NOTEBOOK_BUILD = 'projects_notebook_build'
     PROJECTS_NOTEBOOK_START = 'projects_notebook_start'
     PROJECTS_NOTEBOOK_STOP = 'projects_notebook_stop'
+    PROJECTS_HANDLE_DATA_UPLOAD = 'projects_handle_data_upload'
     CLUSTERS_UPDATE_SYSTEM_INFO = 'clusters_update_system_info'
     CLUSTERS_UPDATE_SYSTEM_NODES = 'clusters_update_system_nodes'
     CLUSTERS_NOTIFICATION_ALIVE = 'clusters_notification_alive'
@@ -135,6 +136,7 @@ CELERY_TASK_ROUTES = {
     CeleryTasks.PROJECTS_NOTEBOOK_BUILD: {'queue': CeleryQueues.API_EXPERIMENTS},
     CeleryTasks.PROJECTS_NOTEBOOK_START: {'queue': CeleryQueues.API_EXPERIMENTS},
     CeleryTasks.PROJECTS_NOTEBOOK_STOP: {'queue': CeleryQueues.API_EXPERIMENTS},
+    CeleryTasks.PROJECTS_HANDLE_DATA_UPLOAD: {'queue': CeleryQueues.API_EXPERIMENTS},
     CeleryTasks.CLUSTERS_UPDATE_SYSTEM_INFO: {'queue': CeleryQueues.API_CLUSTERS},
     CeleryTasks.CLUSTERS_UPDATE_SYSTEM_NODES: {'queue': CeleryQueues.API_CLUSTERS},
     CeleryTasks.CLUSTERS_NOTIFICATION_ALIVE: {'queue': CeleryQueues.API_CLUSTERS},

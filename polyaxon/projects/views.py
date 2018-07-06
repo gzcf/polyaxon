@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import logging
+import os
+
+from django.conf import settings
+from django.http import HttpResponseServerError
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
@@ -12,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from libs.utils import to_bool
-from libs.views import ListCreateAPIView
+from libs.views import ListCreateAPIView, UploadView
 from projects.models import Project, ExperimentGroup
 from projects.permissions import (
     IsProjectOwnerOrPublicReadOnly,
@@ -24,7 +29,9 @@ from projects.serializers import (
     ExperimentGroupDetailSerializer,
     ProjectDetailSerializer,
 )
-from projects.tasks import stop_group_experiments
+from projects.tasks import stop_group_experiments, handle_new_data
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectCreateView(CreateAPIView):
@@ -112,3 +119,36 @@ class ExperimentGroupStopView(CreateAPIView):
                                      pending=pending,
                                      message='User stopped experiment group')
         return Response(status=status.HTTP_200_OK)
+
+
+class UploadDataView(UploadView):
+    def get_object(self):
+        return get_permissible_project(view=self)
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        project = self.get_object()
+        path = os.path.join(settings.UPLOAD_ROOT, user.username)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        try:
+            tar_file_name = self._handle_posted_data(request=request,
+                                                     filename='{}-data.tar.gz'.format(project.name),
+                                                     directory=path,
+                                                     upload_filename='data')
+        except (IOError, os.error) as e:  # pragma: no cover
+            logger.warning(
+                'IOError while trying to save posted data ({}): {}'.format(e.errno, e.strerror))
+            return HttpResponseServerError()
+
+        json_data = self._handle_json_data(request)
+        is_async = json_data.get('async')
+
+        if is_async is False:
+            file_handler = handle_new_data
+        else:
+            file_handler = handle_new_data.delay
+
+        file_handler(project_id=project.id, tar_file_name=tar_file_name)
+
+        return Response(status=204)
