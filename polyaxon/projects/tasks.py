@@ -154,16 +154,20 @@ def build_notebook(project_id):
         logger.warning('Failed to build notebook %s', e)
         job.set_status(
             JobLifeCycle.FAILED,
-            message='Failed to build image for notebook.'.format(project.unique_name))
+            message='Failed to build image for notebook. project_name={}'.format(project.unique_name))
         return
     except Repo.DoesNotExist:
         logger.warning('No code was found for this project')
         job.set_status(
             JobLifeCycle.FAILED,
-            message='Failed to build image for notebook.'.format(project.unique_name))
+            message='Failed to build image for notebook. project_name={}'.format(project.unique_name))
         return
 
     if not status:
+        logger.warning('Failed to build notebook due to unknown error', )
+        job.set_status(
+            JobLifeCycle.FAILED,
+            message='Failed to build image for notebook. project_name={}'.format(project.unique_name))
         return
 
     # Now we can start the notebook

@@ -162,10 +162,12 @@ class BaseDockerBuilder(object):
         ):
             self._handle_logs(log_line)
             if 'error' in log_line:
+                logger.error('Failed to build docker image: error=%s', log_line)
                 return False
             # Check if we need to stop this process
             check_pulse, should_stop = self._check_pulse(check_pulse)
             if should_stop:
+                logger.info('Early stop building docker image')
                 return False
 
         # Checkout back to master
@@ -186,7 +188,7 @@ class BaseDockerBuilder(object):
             for progress in lines:
                 if 'error' in progress:
                     logger.error(progress['error'], extra=dict(phase='failed'))
-                    return
+                    return False
                 if 'id' not in progress:
                     continue
                 if 'progressDetail' in progress and progress['progressDetail']:
@@ -200,6 +202,7 @@ class BaseDockerBuilder(object):
             # Check if we need to stop this process
             check_pulse, should_stop = self._check_pulse(check_pulse)
             if should_stop:
+                logger.info('Early stop pushing docker image')
                 return False
 
         return True
