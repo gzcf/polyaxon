@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 from django.conf import settings
+from kubernetes import client
 
 from spawners.templates import constants
 from spawners.templates import pods
@@ -36,4 +37,11 @@ def get_pod_volumes():
                 volume_mounts.append(pods.get_volume_mount(volume=volume_name,
                                                            volume_mount=mount_path,
                                                            read_only=read_only))
+
+
+    shm_volume = client.V1Volume(name=constants.SHM_VOLUME,
+                                 empty_dir=client.V1EmptyDirVolumeSource(medium='Memory'))
+    volumes.append(shm_volume)
+    shm_volume_mount = client.V1VolumeMount(name=shm_volume.name, mount_path='/dev/shm')
+    volume_mounts.append(shm_volume_mount)
     return volumes, volume_mounts
