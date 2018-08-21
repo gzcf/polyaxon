@@ -23,6 +23,7 @@ api_patterns = [
     # always include project last because of it's patterns
     url(r'', include('experiments.urls', namespace='experiments')),
     url(r'', include('repos.urls', namespace='repos')),
+    url(r'', include('plugins.api_urls', namespace='plugins')),
     url(r'', include('projects.urls', namespace='projects')),
 ]
 

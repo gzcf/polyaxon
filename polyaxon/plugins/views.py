@@ -4,20 +4,47 @@ from __future__ import absolute_import, division, print_function
 from django.conf import settings
 from django.db import transaction
 from django.http import Http404
-from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, filters
+from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from libs.utils import to_bool
 from libs.views import ProtectedView
+from plugins.models import NotebookJob, TensorboardJob
 from plugins.serializers import TensorboardJobSerializer, NotebookJobSerializer
 from projects.models import Project
 from projects.permissions import IsProjectOwnerOrPublicReadOnly, get_permissible_project
 from projects.tasks import start_tensorboard, stop_tensorboard, build_notebook, stop_notebook
 from repos import git
 from schedulers import notebook_scheduler, tensorboard_scheduler
-from spawners.utils.constants import ExperimentLifeCycle
+from spawners.utils.constants import ExperimentLifeCycle, JobLifeCycle
+
+
+class PluginJobListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ('created_at', 'project__name', 'user__username')
+
+    def get_queryset(self):
+        print('PluginJobListView')
+        queryset = self.queryset
+        is_running = to_bool(self.request.query_params.get('is_running', False))
+        if is_running:
+            queryset = queryset.filter(job_status__status__in=JobLifeCycle.RUNNING_STATUS)
+
+        return queryset
+
+
+class NotebookJobListView(PluginJobListView):
+    queryset = NotebookJob.objects.all()
+    serializer_class = NotebookJobSerializer
+
+
+class TensorboardJobListView(PluginJobListView):
+    queryset = TensorboardJob.objects.all()
+    serializer_class = TensorboardJobSerializer
 
 
 class StartTensorboardView(CreateAPIView):

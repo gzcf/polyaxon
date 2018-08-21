@@ -39,7 +39,7 @@ class PluginJobBase(Job):
 
     @cached_property
     def resources(self):
-        return self.compiled_spec.total_resources
+        return self.compiled_spec.resources
 
     @cached_property
     def unique_name(self):

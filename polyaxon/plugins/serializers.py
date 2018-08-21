@@ -9,12 +9,23 @@ from plugins.models import TensorboardJob, NotebookJob
 
 class PluginJobBaseSerializer(serializers.ModelSerializer):
     user = fields.SerializerMethodField()
+    project_name = fields.SerializerMethodField()
+    resources = fields.SerializerMethodField()
 
     class Meta:
-        fields = ('user', 'content', 'config',)
+        fields = ('user', 'content', 'config', 'created_at', 'last_status', 'resources', 'project_name')
 
     def get_user(self, obj):
         return obj.user.username
+
+    def get_project_name(self, obj):
+        return obj.project.unique_name
+
+    def get_resources(self, obj):
+        resources = obj.resources
+        if resources and not isinstance(resources, dict):
+            resources = resources.to_dict()
+        return resources
 
     def _validate_spec(self, values):
         # content is optional
