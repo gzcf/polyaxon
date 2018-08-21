@@ -31,6 +31,11 @@ export const PaginationReducer: Reducer<PaginationStateSchema> =
           ...state,
           queueCurrentPage: action.currentPage,
         };
+      case actionTypes.PAGINATE_NOTEBOOK_JOBS:
+        return {
+          ...state,
+          notebookJobsCurrentPage: action.currentPage,
+        };
       default:
         return state;
     }

@@ -5,7 +5,8 @@ export enum actionTypes {
   PAGINATE_GROUP = 'PAGINATE_GROUP',
   PAGINATE_EXPERIMENT = 'PAGINATE_EXPERIMENT',
   PAGINATE_JOB = 'PAGINATE_JOB',
-  PAGINATE_QUEUE = 'PAGINATE_QUEUE'
+  PAGINATE_QUEUE = 'PAGINATE_QUEUE',
+  PAGINATE_NOTEBOOK_JOBS = 'PAGINATE_NOTEBOOK_JOBS',
 }
 
 export interface PaginationAction extends Action {
@@ -13,7 +14,8 @@ export interface PaginationAction extends Action {
     | actionTypes.PAGINATE_GROUP
     | actionTypes.PAGINATE_EXPERIMENT
     | actionTypes.PAGINATE_JOB
-    | actionTypes.PAGINATE_QUEUE;
+    | actionTypes.PAGINATE_QUEUE
+    | actionTypes.PAGINATE_NOTEBOOK_JOBS;
   currentPage: number;
 }
 
@@ -52,6 +54,13 @@ export function paginateQueueActionCreator(currentPage: number): PaginationActio
   };
 }
 
+export function paginateNotebookJobsActionCreator(currentPage: number): PaginationAction {
+  return {
+    type: actionTypes.PAGINATE_NOTEBOOK_JOBS,
+    currentPage
+  };
+}
+
 export function paginateProject(dispatch: any, currentPage?: number) {
   return dispatch(paginateProjectActionCreator(currentPage || 1));
 }
@@ -70,4 +79,8 @@ export function paginateJob(dispatch: any, currentPage?: number) {
 
 export function paginateQueue(dispatch: any, currentPage?: number) {
   return dispatch(paginateQueueActionCreator(currentPage || 1));
+}
+
+export function paginateNotebookJobs(dispatch: any, currentPage?: number) {
+  return dispatch(paginateNotebookJobsActionCreator(currentPage || 1));
 }

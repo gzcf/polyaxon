@@ -11,5 +11,6 @@ export const PaginationEmptyState = {
   groupCurrentPage: 1,
   experimentCurrentPage: 1,
   jobCurrentPage: 1,
-  queueCurrentPage: 1
+  queueCurrentPage: 1,
+  notebookJobsCurrentPage: 1,
 };
