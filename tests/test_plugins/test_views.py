@@ -7,10 +7,12 @@ from unittest.mock import patch
 
 from rest_framework import status
 
+from factories.factory_plugins import TensorboardJobFactory, NotebookJobFactory
 from factories.factory_repos import RepoFactory
 from factories.fixtures import plugin_spec_parsed_content
 from libs.views import ProtectedView
 from plugins.models import TensorboardJob, NotebookJob
+from plugins.serializers import TensorboardJobSerializer, NotebookJobSerializer
 from polyaxon.urls import API_V1
 from projects.models import Project
 from factories.factory_projects import ProjectFactory
@@ -21,6 +23,180 @@ from spawners.notebook_spawner import NotebookSpawner
 from spawners.templates.constants import DEPLOYMENT_NAME
 from spawners.utils.constants import JobLifeCycle
 from tests.utils import BaseViewTest, BaseTransactionViewTest
+
+
+
+class BaseTestPluginJobListViewV1(BaseTransactionViewTest):
+    serializer_class = None
+
+    def get_url(self):
+        raise NotImplementedError
+
+    def get_objects(self):
+        raise NotImplementedError
+
+    def get_queryset(self):
+        raise NotImplementedError
+
+    def test_get(self):
+        resp = self.auth_client.get(self.get_url())
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+        assert resp.data['count'] == len(self.get_objects())
+
+        data = resp.data['results']
+        assert len(data) == self.get_queryset().count()
+        assert data == self.serializer_class(self.get_queryset(), many=True).data
+
+    def test_get_running_experiments(self):
+        url = self.get_url() + '?is_running=1'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+
+        running_count = len(self.get_queryset().filter(job_status__status__in=JobLifeCycle.RUNNING_STATUS))
+        assert resp.data['count'] == running_count
+
+        data = resp.data['results']
+        for job in data:
+            assert job['last_status'] in JobLifeCycle.RUNNING_STATUS
+
+    def test_get_order_by_created_at_desc(self):
+        url = self.get_url() + '?ordering=-created_at'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+        data = resp.data['results']
+        prev_created_at = None
+        for job in data:
+            assert prev_created_at is None or prev_created_at >= job['created_at']
+            prev_created_at = job['created_at']
+
+        url = self.get_url() + '?ordering=-created_at&is_running=1'
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        data = resp.data['results']
+        prev_created_at = None
+        for job in data:
+            assert job['last_status'] in JobLifeCycle.RUNNING_STATUS
+            assert prev_created_at is None or prev_created_at >= job['created_at']
+            prev_created_at = job['created_at']
+
+
+    def test_ordering_with_pagination(self):
+        limit = len(self.get_objects()) - 1
+        url = self.get_url() + '?ordering=-created_at&limit={}'.format(limit)
+        resp = self.auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+
+        next = resp.data.get('next')
+        assert next is not None
+        assert resp.data['count'] == self.get_queryset().count()
+
+        data = resp.data['results']
+        assert len(data) == limit
+        prev_created_at = None
+        for job in data:
+            assert prev_created_at is None or prev_created_at >= job['created_at']
+            prev_created_at = job['created_at']
+
+        resp = self.auth_client.get(next)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+
+        data = resp.data['results']
+        assert len(data) == 1
+        assert prev_created_at >= data[0]['created_at']
+
+
+    def test_pagination(self):
+        limit = len(self.get_objects()) - 1
+        resp = self.auth_client.get("{}?limit={}".format(self.url, limit))
+        assert resp.status_code == status.HTTP_200_OK
+
+        next = resp.data.get('next')
+        assert next is not None
+        assert resp.data['count'] == self.get_queryset().count()
+
+        data = resp.data['results']
+        assert len(data) == limit
+        assert data == self.serializer_class(self.get_queryset()[:limit], many=True).data
+
+        resp = self.auth_client.get(next)
+        assert resp.status_code == status.HTTP_200_OK
+
+        assert resp.data['next'] is None
+
+        data = resp.data['results']
+        assert len(data) == 1
+        assert data == self.serializer_class(self.get_queryset()[limit:], many=True).data
+
+
+class TestTensorboardJobListViewV1(BaseTestPluginJobListViewV1):
+    model_class = TensorboardJob
+    factory_class = TensorboardJobFactory
+    serializer_class = TensorboardJobSerializer
+    HAS_AUTH = False
+
+    def get_url(self):
+        return self.url
+
+    def get_objects(self):
+        return self.objects
+
+    def get_queryset(self):
+        return self.queryset
+
+    def setUp(self):
+        super().setUp()
+        self.objects = []
+        statuses = [JobLifeCycle.CREATED, JobLifeCycle.BUILDING,
+                    JobLifeCycle.RUNNING, JobLifeCycle.SUCCEEDED]
+        for i in range(len(statuses)):
+            object = self.factory_class()
+            object.set_status(statuses[i])
+            project = ProjectFactory()
+            project.tensorboard = object
+            project.save()
+            self.objects.append(object)
+        self.url = '/{}/tensorboard_jobs'.format(API_V1)
+        self.queryset = self.model_class.objects.all()
+
+
+class TestNotebookJobListViewV1(BaseTestPluginJobListViewV1):
+    model_class = NotebookJob
+    factory_class = NotebookJobFactory
+    serializer_class = NotebookJobSerializer
+    HAS_AUTH = False
+
+    def get_url(self):
+        return self.url
+
+    def get_objects(self):
+        return self.objects
+
+    def get_queryset(self):
+        return self.queryset
+
+    def setUp(self):
+        super().setUp()
+        self.objects = []
+        statuses = [JobLifeCycle.CREATED, JobLifeCycle.BUILDING,
+                    JobLifeCycle.RUNNING, JobLifeCycle.SUCCEEDED]
+        for _ in range(len(statuses)):
+            object = self.factory_class()
+            project = ProjectFactory()
+            project.notebook = object
+            project.save()
+            self.objects.append(object)
+        self.url = '/{}/notebook_jobs'.format(API_V1)
+        self.queryset = self.model_class.objects.all()
+
+
+del BaseTestPluginJobListViewV1
 
 
 class TestStartTensorboardViewV1(BaseTransactionViewTest):
