@@ -16,12 +16,12 @@ export enum actionTypes {
 
 export interface ReceiveNotebookJobsAction extends Action {
   type: actionTypes.RECEIVE_NOTEBOOK_JOBS;
-  notebook_jobs: PluginJobModel[];
+  notebookJobs: PluginJobModel[];
   count: number;
 }
 
 export interface RequestNotebookJobsAction extends Action {
-  type: actionTypes.RECEIVE_NOTEBOOK_JOBS;
+  type: actionTypes.REQUEST_NOTEBOOK_JOBS;
 }
 
 export type PluginJobsAction =
@@ -30,14 +30,14 @@ export type PluginJobsAction =
 
 export function requestNotebookJobsActionCreator(): RequestNotebookJobsAction {
   return {
-    type: actionTypes.RECEIVE_NOTEBOOK_JOBS,
+    type: actionTypes.REQUEST_NOTEBOOK_JOBS,
   };
 }
 
-export function receiveNotebookJobsActionCreator(notebook_jobs: PluginJobModel[], count: number): ReceiveNotebookJobsAction {
+export function receiveNotebookJobsActionCreator(notebookJobs: PluginJobModel[], count: number): ReceiveNotebookJobsAction {
   return {
     type: actionTypes.RECEIVE_NOTEBOOK_JOBS,
-    notebook_jobs,
+    notebookJobs,
     count
   };
 }
@@ -78,7 +78,7 @@ function fetchPluginJobs(jobsUrl: string,
 
 export function fetchNotebookJobs(currentPage?: number, orderBy?: string): any {
   return fetchPluginJobs(
-    `${BASE_URL}/notebooks`,
+    `${BASE_URL}/notebook_jobs`,
     requestNotebookJobsActionCreator,
     receiveNotebookJobsActionCreator,
     paginationActions.paginateNotebookJobs,

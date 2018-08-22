@@ -1,15 +1,13 @@
+import { PluginJobModel } from '../models/pluginJob';
 import * as React from 'react';
-import * as Table from 'react-bootstrap/lib/Table';
-import PaginatedList from './paginatedList';
-import './queue.less';
-import { ExperimentModel } from '../models/experiment';
-import { SyntheticEvent } from 'react';
+import { Table } from 'react-bootstrap';
 import { SortIndicator } from './sortIndicator';
+import PaginatedList from './paginatedList';
 
 export interface Props {
   count: number;
   fetchData: (currentPage?: number, ordreBy?: string) => any;
-  experiments: ExperimentModel[];
+  jobs: PluginJobModel[];
   currentPage: number;
 }
 
@@ -18,7 +16,7 @@ interface State {
   orderByDirection: string;
 }
 
-export default class Queue extends React.Component<Props, State> {
+export default class PluginJobs extends React.Component<Props, State> {
   fields: Array<{[key: string]: any}>;
 
   constructor(props: Props) {
@@ -36,9 +34,6 @@ export default class Queue extends React.Component<Props, State> {
       title: 'Project',
       sortable: true,
       field: 'project__name'
-    }, {
-      title: 'Experiment Sequence',
-      sortable: false,
     }, {
       title: 'Create Time',
       sortable: true,
@@ -78,8 +73,8 @@ export default class Queue extends React.Component<Props, State> {
 
   public render() {
 
-    const listExperiments = () => {
-      const experiments = this.props.experiments;
+    const listJobs = () => {
+      const jobs = this.props.jobs;
       return (
         <div>
           <Table striped bordered condensed hover>
@@ -106,26 +101,25 @@ export default class Queue extends React.Component<Props, State> {
             </thead>
             <tbody>
               {
-                experiments.map(xp =>
-                  <tr key={xp.sequence}>
-                    <td>{xp.user}</td>
-                    <td>{xp.project_name.split('.')[1]}</td>
-                    <td>{xp.sequence}</td>
-                    <td>{this.formatDatetime(xp.created_at)}</td>
-                    <td>{xp.last_status}</td>
-                    <td>{xp.resources &&
+                jobs.map((job, index) =>
+                  <tr key={index}>
+                    <td>{job.user}</td>
+                    <td>{job.project_name.split('.')[1]}</td>
+                    <td>{this.formatDatetime(job.created_at)}</td>
+                    <td>{job.last_status}</td>
+                    <td>{job.resources &&
                       <div className="meta meta-resources">
-                        {Object.keys(xp.resources)
+                        {Object.keys(job.resources)
                           .filter(
                             (res, idx) =>
-                              xp.resources[res] != null
+                              job.resources[res] != null
                           )
                           .map(
                             (res, idx) =>
                               <span className="meta-info" key={idx}>
                           <i className="fa fa-microchip icon" aria-hidden="true"/>
                           <span className="title">{res}:</span>
-                                {xp.resources[res].requests || ''} - {xp.resources[res].limits || ''}
+                                {job.resources[res].requests || ''} - {job.resources[res].limits || ''}
                         </span>
                           )}
                       </div>
@@ -148,7 +142,7 @@ export default class Queue extends React.Component<Props, State> {
       <div>
         <PaginatedList
           count={this.props.count}
-          componentList={listExperiments()}
+          componentList={listJobs()}
           fetchData={_fetchData}
         />
       </div>

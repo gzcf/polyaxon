@@ -9,6 +9,7 @@ import { ModalStateSchema } from '../models/modal';
 import { UserEmptyState, UserStateSchema } from '../models/user';
 import { PaginationStateSchema } from '../models/pagination';
 import { QueueStateSchema } from '../models/queue';
+import { NotebookJobsStateSchema } from '../models/pluginJob';
 
 export interface AppState {
   projects: ProjectStateSchema;
@@ -22,6 +23,7 @@ export interface AppState {
   pagination: PaginationStateSchema;
   logs: string;
   queueExperiments: QueueStateSchema;
+  notebookJobs: NotebookJobsStateSchema;
 }
 
 export const AppEmptyState = {

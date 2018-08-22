@@ -13,6 +13,7 @@ import { userReducer } from '../reducers/user';
 import { PaginationReducer } from '../reducers/pagination';
 import { logsReducer } from './logs';
 import { queueExperimentsReducer } from './queue';
+import { notebookJobsReducer } from './pluginJobs';
 
 const combinedReducer = combineReducers<AppState>({
   projects: projectsReducer,
@@ -25,7 +26,8 @@ const combinedReducer = combineReducers<AppState>({
   form: formReducer,
   pagination: PaginationReducer,
   logs: logsReducer,
-  queueExperiments: queueExperimentsReducer
+  queueExperiments: queueExperimentsReducer,
+  notebookJobs: notebookJobsReducer
 });
 
 function SliceReducer(state: AppState, action: Action) {
@@ -40,7 +42,8 @@ function SliceReducer(state: AppState, action: Action) {
     form: state.form,
     pagination: state.pagination,
     logs: state.logs,
-    queueExperiments: state.queueExperiments
+    queueExperiments: state.queueExperiments,
+    notebookJobs: state.notebookJobs
   };
 }
 
