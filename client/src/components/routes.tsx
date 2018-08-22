@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import ProjectDetail from '../containers/projectDetail';
 import ExperimentDetail from '../containers/experimentDetail';
@@ -10,10 +10,8 @@ import Login from '../containers/login';
 import Logout from '../containers/logout';
 import Token from '../containers/token';
 
-import { isUserAuthenticated, getHomeUrl, getLoginUrl, getLogoutUrl } from '../constants/utils';
-import Queue from '../containers/queue';
-import { NotebookJobs } from "../containers/notebookJobs";
-import { TensorboardJobs } from '../containers/tensorboardJobs';
+import { getHomeUrl, getLoginUrl, getLogoutUrl, isUserAuthenticated } from '../constants/utils';
+import Queue from '../components/queue';
 
 
 function Routes() {
@@ -24,8 +22,6 @@ function Routes() {
   let groupDetailRoute = '/app/:user/:projectName/groups/:groupSequence/';
   let jobDetailRoute = '/app/:user/:projectName/experiments/:experimentSequence/jobs/:jobSequence/';
   let queueRoute = '/app/queue';
-  let notebookJobsRoute = '/app/notebookJobs';
-  let tensorboardJobsRoute = '/app/tensorboardJobs';
 
   return (
     <Switch>
@@ -36,28 +32,6 @@ function Routes() {
         render={() => (
           isUserAuthenticated() ? (
             <Route path={tokenRoute} component={Token}/>
-          ) : (
-            <Redirect to={getLoginUrl()}/>
-          )
-        )}
-      />
-
-      <Route
-        path={notebookJobsRoute}
-        render={() => (
-          isUserAuthenticated() ? (
-            <Route path={notebookJobsRoute} component={NotebookJobs}/>
-          ) : (
-            <Redirect to={getLoginUrl()}/>
-          )
-        )}
-      />
-
-      <Route
-        path={tensorboardJobsRoute}
-        render={() => (
-          isUserAuthenticated() ? (
-            <Route path={tensorboardJobsRoute} component={TensorboardJobs}/>
           ) : (
             <Redirect to={getLoginUrl()}/>
           )

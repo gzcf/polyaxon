@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { QueueExperimentsAction, actionTypes } from '../actions/queue';
+import { QueueExperimentsAction, actionTypes } from '../actions/queueExperiment';
 import { ExperimentModel } from '../models/experiment';
 import { EmptyQueueState, QueueStateSchema } from '../models/queue';
 

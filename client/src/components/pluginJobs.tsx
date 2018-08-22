@@ -22,7 +22,7 @@ export default class PluginJobs extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      orderByIndex: 3,
+      orderByIndex: 2,
       orderByDirection: 'DESC'
     };
 

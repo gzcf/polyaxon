@@ -1,6 +1,6 @@
 import { AppState } from '../constants/types';
 import { connect, Dispatch } from 'react-redux';
-import * as actions from '../actions/pluginJobs';
+import * as actions from '../actions/pluginJob';
 import PluginJobs from '../components/pluginJobs';
 
 export function mapStateToProps(state: AppState, params: any) {

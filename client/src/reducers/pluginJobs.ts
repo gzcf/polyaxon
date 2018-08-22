@@ -3,7 +3,7 @@ import {
   EmptyNotebookJobsState, EmptyTensorboardJobsState, NotebookJobsStateSchema,
   TensorboardJobsStateSchema
 } from '../models/pluginJob';
-import { PluginJobsAction, actionTypes } from '../actions/pluginJobs';
+import { PluginJobsAction, actionTypes } from '../actions/pluginJob';
 
 export const notebookJobsReducer: Reducer<NotebookJobsStateSchema> =
   (state: NotebookJobsStateSchema = EmptyNotebookJobsState, action: PluginJobsAction) => {

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { SyntheticEvent } from 'react';
+import './sortIndicator.less';
 
 enum Direction {
   ASC = 'ASC',
@@ -69,7 +70,7 @@ export class SortIndicator extends React.Component<SortIndicatorProps, SortIndic
     return (
       <div onClick={this.onClick}>
         <span>{this.props.text}</span>
-        <span className={`sort-indicator ${className}`} />
+        <span className={`sort-indicator ${className}`}/>
       </div>
     );
   }

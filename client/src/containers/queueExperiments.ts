@@ -1,8 +1,8 @@
 import { connect, Dispatch } from 'react-redux';
 
 import { AppState } from '../constants/types';
-import Queue from '../components/queue';
-import * as actions from '../actions/queue';
+import * as actions from '../actions/queueExperiment';
+import QueueExperiments from '../components/queueExperiments';
 
 export function mapStateToProps(state: AppState, params: any) {
   return {
@@ -24,4 +24,4 @@ export function mapDispatchToProps(dispatch: Dispatch<any>, params: any): Dispat
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Queue);
+export default connect(mapStateToProps, mapDispatchToProps)(QueueExperiments);
