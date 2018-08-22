@@ -11,7 +11,11 @@
         "user": [
             "admin"
         ],
-        "is_public": true
+        "is_public": true,
+        "tensorboard": null,
+        "notebook": null,
+        "has_tensorboard": false,
+        "has_notebook": false
     }
 },
 {
@@ -26,7 +30,11 @@
         "user": [
             "admin"
         ],
-        "is_public": true
+        "is_public": true,
+        "tensorboard": 1,
+        "notebook": 1,
+        "has_tensorboard": false,
+        "has_notebook": false
     }
 },
 {
@@ -41,7 +49,11 @@
         "user": [
             "admin"
         ],
-        "is_public": true
+        "is_public": true,
+        "tensorboard": null,
+        "notebook": null,
+        "has_tensorboard": false,
+        "has_notebook": false
     }
 },
 {
@@ -56,7 +68,11 @@
         "user": [
             "admin"
         ],
-        "is_public": true
+        "is_public": true,
+        "tensorboard": null,
+        "notebook": null,
+        "has_tensorboard": false,
+        "has_notebook": false
     }
 },
 {

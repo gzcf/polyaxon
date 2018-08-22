@@ -1,0 +1,105 @@
+[
+{
+    "model": "plugins.tensorboardjob",
+    "pk": 1,
+    "fields": {
+        "created_at": "2018-08-22T09:12:57.300Z",
+        "updated_at": "2018-08-22T09:12:57.347Z",
+        "user": [
+            "admin"
+        ],
+        "content": null,
+        "config": {
+            "run": {
+                "image": "tensorboard-image"
+            },
+            "project": {
+                "name": "mnist"
+            },
+            "version": 1
+        },
+        "job_status": 1
+    }
+},
+{
+    "model": "plugins.notebookjob",
+    "pk": 1,
+    "fields": {
+        "created_at": "2018-08-22T09:13:06.194Z",
+        "updated_at": "2018-08-22T09:13:06.631Z",
+        "user": [
+            "admin"
+        ],
+        "content": null,
+        "config": {
+            "run": {
+                "steps": [
+                    "pip3 install jupyter"
+                ],
+                "image": "reg.linkdoc-inc.com/polyaxon/ai:0.3"
+            },
+            "project": {
+                "name": "mnist"
+            },
+            "version": 1,
+            "environment": {
+                "resources": {
+                    "gpu": {
+                        "limits": 1,
+                        "requests": 1
+                    }
+                }
+            }
+        },
+        "job_status": 3
+    }
+},
+{
+    "model": "plugins.tensorboardjobstatus",
+    "pk": 1,
+    "fields": {
+        "uuid": "f121066b-615f-4371-8459-2a4a83a1156e",
+        "created_at": "2018-08-22T09:12:57.314Z",
+        "status": "Building",
+        "message": null,
+        "details": null,
+        "job": 1
+    }
+},
+{
+    "model": "plugins.notebookjobstatus",
+    "pk": 1,
+    "fields": {
+        "uuid": "315d55d0-6868-4b46-917c-9541279f76e6",
+        "created_at": "2018-08-22T09:13:06.207Z",
+        "status": "Created",
+        "message": null,
+        "details": null,
+        "job": 1
+    }
+},
+{
+    "model": "plugins.notebookjobstatus",
+    "pk": 2,
+    "fields": {
+        "uuid": "83950a26-ed7b-44f0-95d3-d7ab467fea6a",
+        "created_at": "2018-08-22T09:13:06.452Z",
+        "status": "Building",
+        "message": "Building container",
+        "details": null,
+        "job": 1
+    }
+},
+{
+    "model": "plugins.notebookjobstatus",
+    "pk": 3,
+    "fields": {
+        "uuid": "2740e319-6104-4b76-afee-117f7ebe6530",
+        "created_at": "2018-08-22T09:13:06.605Z",
+        "status": "Running",
+        "message": "",
+        "details": null,
+        "job": 1
+    }
+}
+]
