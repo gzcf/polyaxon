@@ -36,6 +36,11 @@ export const PaginationReducer: Reducer<PaginationStateSchema> =
           ...state,
           notebookJobsCurrentPage: action.currentPage,
         };
+      case actionTypes.PAGINATE_TENSORBOARD_JOBS:
+        return {
+          ...state,
+          tensorboardJobsCurrentPage: action.currentPage,
+        };
       default:
         return state;
     }

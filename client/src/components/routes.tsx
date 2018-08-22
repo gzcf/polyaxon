@@ -13,6 +13,7 @@ import Token from '../containers/token';
 import { isUserAuthenticated, getHomeUrl, getLoginUrl, getLogoutUrl } from '../constants/utils';
 import Queue from '../containers/queue';
 import { NotebookJobs } from "../containers/notebookJobs";
+import { TensorboardJobs } from '../containers/tensorboardJobs';
 
 
 function Routes() {
@@ -23,7 +24,8 @@ function Routes() {
   let groupDetailRoute = '/app/:user/:projectName/groups/:groupSequence/';
   let jobDetailRoute = '/app/:user/:projectName/experiments/:experimentSequence/jobs/:jobSequence/';
   let queueRoute = '/app/queue';
-  let notebookJobsRoute = '/app/notebookJobs'
+  let notebookJobsRoute = '/app/notebookJobs';
+  let tensorboardJobsRoute = '/app/tensorboardJobs';
 
   return (
     <Switch>
@@ -45,6 +47,17 @@ function Routes() {
         render={() => (
           isUserAuthenticated() ? (
             <Route path={notebookJobsRoute} component={NotebookJobs}/>
+          ) : (
+            <Redirect to={getLoginUrl()}/>
+          )
+        )}
+      />
+
+      <Route
+        path={tensorboardJobsRoute}
+        render={() => (
+          isUserAuthenticated() ? (
+            <Route path={tensorboardJobsRoute} component={TensorboardJobs}/>
           ) : (
             <Redirect to={getLoginUrl()}/>
           )

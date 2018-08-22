@@ -13,7 +13,7 @@ import { userReducer } from '../reducers/user';
 import { PaginationReducer } from '../reducers/pagination';
 import { logsReducer } from './logs';
 import { queueExperimentsReducer } from './queue';
-import { notebookJobsReducer } from './pluginJobs';
+import { notebookJobsReducer, tensorboardJobsReducer } from './pluginJobs';
 
 const combinedReducer = combineReducers<AppState>({
   projects: projectsReducer,
@@ -27,7 +27,8 @@ const combinedReducer = combineReducers<AppState>({
   pagination: PaginationReducer,
   logs: logsReducer,
   queueExperiments: queueExperimentsReducer,
-  notebookJobs: notebookJobsReducer
+  notebookJobs: notebookJobsReducer,
+  tensorboardJobs: tensorboardJobsReducer
 });
 
 function SliceReducer(state: AppState, action: Action) {
@@ -43,7 +44,8 @@ function SliceReducer(state: AppState, action: Action) {
     pagination: state.pagination,
     logs: state.logs,
     queueExperiments: state.queueExperiments,
-    notebookJobs: state.notebookJobs
+    notebookJobs: state.notebookJobs,
+    tensorboardJobs: state.tensorboardJobs
   };
 }
 

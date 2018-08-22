@@ -9,7 +9,7 @@ import { ModalStateSchema } from '../models/modal';
 import { UserEmptyState, UserStateSchema } from '../models/user';
 import { PaginationStateSchema } from '../models/pagination';
 import { QueueStateSchema } from '../models/queue';
-import { NotebookJobsStateSchema } from '../models/pluginJob';
+import { NotebookJobsStateSchema, TensorboardJobsStateSchema } from '../models/pluginJob';
 
 export interface AppState {
   projects: ProjectStateSchema;
@@ -24,6 +24,7 @@ export interface AppState {
   logs: string;
   queueExperiments: QueueStateSchema;
   notebookJobs: NotebookJobsStateSchema;
+  tensorboardJobs: TensorboardJobsStateSchema;
 }
 
 export const AppEmptyState = {

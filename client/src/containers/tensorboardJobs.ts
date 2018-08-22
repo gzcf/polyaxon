@@ -5,9 +5,9 @@ import PluginJobs from '../components/pluginJobs';
 
 export function mapStateToProps(state: AppState, params: any) {
   return {
-    jobs: state.notebookJobs.notebookJobs,
-    count: state.notebookJobs.count,
-    currentPage: state.pagination.notebookJobsCurrentPage
+    jobs: state.tensorboardJobs.tensorboardJobs,
+    count: state.tensorboardJobs.count,
+    currentPage: state.pagination.tensorboardJobsCurrentPage
   };
 }
 
@@ -18,9 +18,9 @@ export interface DispatchProps {
 export function mapDispatchToProps(dispatch: Dispatch<any>, params: any): DispatchProps {
   return {
     fetchData: (currentPage?: number, ordreBy?: string) => {
-      dispatch(actions.fetchNotebookJobs(currentPage, ordreBy));
+      dispatch(actions.fetchTensorboardJobs(currentPage, ordreBy));
     }
   };
 }
 
-export const NotebookJobs = connect(mapStateToProps, mapDispatchToProps)(PluginJobs);
+export const TensorboardJobs = connect(mapStateToProps, mapDispatchToProps)(PluginJobs);

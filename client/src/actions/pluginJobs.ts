@@ -24,9 +24,21 @@ export interface RequestNotebookJobsAction extends Action {
   type: actionTypes.REQUEST_NOTEBOOK_JOBS;
 }
 
+export interface ReceiveTensorboardJobsAction extends Action {
+  type: actionTypes.RECEIVE_TENSORBOARD_JOBS;
+  tensorboardJobs: PluginJobModel[];
+  count: number;
+}
+
+export interface RequestTensorboardJobsAction extends Action {
+  type: actionTypes.REQUEST_TENSORBOARD_JOBS;
+}
+
 export type PluginJobsAction =
   ReceiveNotebookJobsAction
-  | RequestNotebookJobsAction;
+  | RequestNotebookJobsAction
+  | ReceiveTensorboardJobsAction
+  | RequestTensorboardJobsAction;
 
 export function requestNotebookJobsActionCreator(): RequestNotebookJobsAction {
   return {
@@ -38,6 +50,20 @@ export function receiveNotebookJobsActionCreator(notebookJobs: PluginJobModel[],
   return {
     type: actionTypes.RECEIVE_NOTEBOOK_JOBS,
     notebookJobs,
+    count
+  };
+}
+
+export function requestTensorboardJobsActionCreator(): RequestTensorboardJobsAction {
+  return {
+    type: actionTypes.REQUEST_TENSORBOARD_JOBS,
+  };
+}
+
+export function receiveTensorboardJobsActionCreator(tensorboardJobs: PluginJobModel[], count: number): ReceiveTensorboardJobsAction {
+  return {
+    type: actionTypes.RECEIVE_TENSORBOARD_JOBS,
+    tensorboardJobs,
     count
   };
 }
@@ -82,6 +108,17 @@ export function fetchNotebookJobs(currentPage?: number, orderBy?: string): any {
     requestNotebookJobsActionCreator,
     receiveNotebookJobsActionCreator,
     paginationActions.paginateNotebookJobs,
+    currentPage,
+    orderBy
+  );
+}
+
+export function fetchTensorboardJobs(currentPage?: number, orderBy?: string): any {
+  return fetchPluginJobs(
+    `${BASE_URL}/tensorboard_jobs`,
+    requestTensorboardJobsActionCreator,
+    receiveTensorboardJobsActionCreator,
+    paginationActions.paginateTensorboardJobs,
     currentPage,
     orderBy
   );
